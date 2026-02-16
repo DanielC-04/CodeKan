@@ -1,0 +1,19 @@
+:host {
+  display: block;
+}
+
+.task-card {
+  transition: box-shadow 160ms ease, border-color 160ms ease, transform 160ms ease;
+}
+
+.task-card:hover {
+  border-color: #99f6e4;
+  box-shadow: 0 8px 22px -16px rgba(15, 118, 110, 0.6);
+  transform: translateY(-1px);
+}
+
+.task-label {
+  margin: 0;
+  font-size: 11px;
+  line-height: 16px;
+}

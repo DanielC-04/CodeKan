@@ -1,0 +1,30 @@
+<div class="mx-auto grid min-h-screen max-w-3xl items-center px-4 py-8">
+  <nz-card class="shadow-lg">
+    <p class="text-xs uppercase tracking-[0.3em] text-teal-700">DevBoard</p>
+    <h1 class="mt-3 text-2xl font-semibold text-slate-900">Crear cuenta</h1>
+    <p class="mt-2 text-sm text-slate-500">Comienza a gestionar tu tablero con sincronizacion GitHub.</p>
+
+    <form class="mt-8" nz-form [formGroup]="form" (ngSubmit)="submit()" nzLayout="vertical">
+      <nz-form-item>
+        <nz-form-label nzFor="email">Correo</nz-form-label>
+        <nz-form-control nzErrorTip="Ingresa un correo valido">
+          <input id="email" nz-input type="email" formControlName="email" autocomplete="email" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label nzFor="password">Contrasena</nz-form-label>
+        <nz-form-control nzErrorTip="Minimo 8 caracteres">
+          <input id="password" nz-input type="password" formControlName="password" autocomplete="new-password" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <button nz-button nzType="primary" class="w-full">Registrarme</button>
+    </form>
+
+    <p class="mt-6 text-sm text-slate-600">
+      Ya tienes cuenta?
+      <a routerLink="/auth/login" class="font-medium text-teal-700 hover:underline">Iniciar sesion</a>
+    </p>
+  </nz-card>
+</div>

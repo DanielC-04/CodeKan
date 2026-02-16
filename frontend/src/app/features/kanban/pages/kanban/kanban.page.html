@@ -1,0 +1,299 @@
+<section class="mb-4 grid gap-4 rounded-xl border border-slate-200 bg-white/90 p-4 shadow-sm lg:grid-cols-[1fr_2fr]">
+  <div class="space-y-2">
+    <p class="mb-2 text-xs uppercase tracking-[0.2em] text-slate-500">Proyecto activo</p>
+    <nz-select
+      class="w-full"
+      [ngModel]="selectedProjectId()"
+      (ngModelChange)="changeProject($event)"
+      nzPlaceHolder="Selecciona un proyecto"
+    >
+      @for (project of projects(); track project.id) {
+        <nz-option [nzValue]="project.id" [nzLabel]="project.name"></nz-option>
+      }
+    </nz-select>
+
+    <button nz-button nzType="default" type="button" (click)="toggleProjectForm()">
+      {{ showProjectForm ? 'Cancelar proyecto' : 'Nuevo proyecto' }}
+    </button>
+  </div>
+
+  <form [formGroup]="taskForm" (ngSubmit)="submitTask()" class="grid gap-2">
+    <div class="flex gap-2">
+      <input
+        nz-input
+        class="flex-1"
+        placeholder="Nueva tarea"
+        formControlName="title"
+        maxlength="120"
+        [disabled]="!selectedProjectId()"
+      />
+      <button nz-button nzType="primary" [disabled]="!selectedProjectId()">Crear</button>
+    </div>
+
+    <textarea
+      nz-input
+      rows="2"
+      placeholder="Descripcion (opcional)"
+      formControlName="description"
+      maxlength="20000"
+      [disabled]="!selectedProjectId()"
+    ></textarea>
+  </form>
+</section>
+
+@if (showProjectForm) {
+  <section class="mb-4 rounded-xl border border-slate-200 bg-white/90 p-4 shadow-sm">
+    <p class="mb-3 text-xs uppercase tracking-[0.2em] text-slate-500">Crear proyecto</p>
+    <form nz-form nzLayout="vertical" [formGroup]="projectForm" (ngSubmit)="submitProject()" class="grid gap-3 md:grid-cols-2">
+      <nz-form-item>
+        <nz-form-label nzFor="projectName">Nombre</nz-form-label>
+        <nz-form-control nzErrorTip="Nombre obligatorio">
+          <input id="projectName" nz-input formControlName="name" maxlength="150" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label nzFor="repoOwner">Repo owner</nz-form-label>
+        <nz-form-control nzErrorTip="Repo owner obligatorio">
+          <input id="repoOwner" nz-input formControlName="repoOwner" maxlength="100" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label nzFor="repoName">Repo name</nz-form-label>
+        <nz-form-control nzErrorTip="Repo name obligatorio">
+          <input id="repoName" nz-input formControlName="repoName" maxlength="100" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label nzFor="token">GitHub token</nz-form-label>
+        <nz-form-control nzErrorTip="Token obligatorio">
+          <input id="token" nz-input type="password" formControlName="gitHubToken" maxlength="4000" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <div class="md:col-span-2">
+        <button nz-button nzType="primary">Crear proyecto</button>
+      </div>
+    </form>
+  </section>
+}
+
+<nz-spin [nzSpinning]="isLoading()">
+  <section class="grid gap-4 md:grid-cols-3" cdkDropListGroup>
+    <article class="kanban-column">
+      <div class="mb-3 flex items-center justify-between">
+        <h2 class="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">Todo</h2>
+        <span class="text-xs text-slate-400">{{ todoTasks().length }}</span>
+      </div>
+
+      <div
+        class="kanban-list"
+        cdkDropList
+        [id]="todoListId"
+        [cdkDropListConnectedTo]="connectedDropLists"
+        [cdkDropListData]="todoTasks()"
+        (cdkDropListDropped)="drop($event, 'Todo')"
+      >
+        @if (todoTasks().length === 0) {
+          <nz-empty nzNotFoundContent="Sin tareas"></nz-empty>
+        }
+
+        @for (task of todoTasks(); track task.id) {
+          <div cdkDrag [cdkDragData]="task">
+            <app-task-card [task]="task" [labels]="taskLabels(task.id)" (open)="openIssueDetails(task)"></app-task-card>
+          </div>
+        }
+      </div>
+    </article>
+
+    <article class="kanban-column">
+      <div class="mb-3 flex items-center justify-between">
+        <h2 class="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">In Progress</h2>
+        <span class="text-xs text-slate-400">{{ inProgressTasks().length }}</span>
+      </div>
+
+      <div
+        class="kanban-list"
+        cdkDropList
+        [id]="inProgressListId"
+        [cdkDropListConnectedTo]="connectedDropLists"
+        [cdkDropListData]="inProgressTasks()"
+        (cdkDropListDropped)="drop($event, 'InProgress')"
+      >
+        @if (inProgressTasks().length === 0) {
+          <nz-empty nzNotFoundContent="Sin tareas"></nz-empty>
+        }
+
+        @for (task of inProgressTasks(); track task.id) {
+          <div cdkDrag [cdkDragData]="task">
+            <app-task-card [task]="task" [labels]="taskLabels(task.id)" (open)="openIssueDetails(task)"></app-task-card>
+          </div>
+        }
+      </div>
+    </article>
+
+    <article class="kanban-column">
+      <div class="mb-3 flex items-center justify-between">
+        <h2 class="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">Done</h2>
+        <span class="text-xs text-slate-400">{{ doneTasks().length }}</span>
+      </div>
+
+      <div
+        class="kanban-list"
+        cdkDropList
+        [id]="doneListId"
+        [cdkDropListConnectedTo]="connectedDropLists"
+        [cdkDropListData]="doneTasks()"
+        (cdkDropListDropped)="drop($event, 'Done')"
+      >
+        @if (doneTasks().length === 0) {
+          <nz-empty nzNotFoundContent="Sin tareas"></nz-empty>
+        }
+
+        @for (task of doneTasks(); track task.id) {
+          <div cdkDrag [cdkDragData]="task">
+            <app-task-card [task]="task" [labels]="taskLabels(task.id)" (open)="openIssueDetails(task)"></app-task-card>
+          </div>
+        }
+      </div>
+    </article>
+  </section>
+</nz-spin>
+
+<nz-drawer
+  [nzVisible]="issueDrawerOpen()"
+  nzTitle="Detalles de GitHub Issue"
+  nzPlacement="right"
+  [nzWidth]="520"
+  (nzOnClose)="closeIssueDetails()"
+>
+  <ng-container *nzDrawerContent>
+    @if (selectedTask()) {
+      <div class="mb-4 flex gap-2">
+        <button nz-button [nzType]="activeIssueTab() === 'summary' ? 'primary' : 'default'" (click)="setIssueTab('summary')">
+          Resumen
+        </button>
+        <button nz-button [nzType]="activeIssueTab() === 'meta' ? 'primary' : 'default'" (click)="setIssueTab('meta')">
+          Labels y Assignees
+        </button>
+        <button nz-button [nzType]="activeIssueTab() === 'comments' ? 'primary' : 'default'" (click)="setIssueTab('comments')">
+          Comentarios
+        </button>
+      </div>
+
+      @if (activeIssueTab() === 'summary') {
+        <nz-spin [nzSpinning]="issueDetailsLoading()">
+          @if (issueDetails(); as details) {
+            <section class="space-y-3">
+              <div class="flex items-center justify-between gap-2">
+                <h3 class="m-0 text-lg font-semibold text-slate-900">{{ details.title }}</h3>
+                <nz-tag [nzColor]="details.state === 'open' ? 'blue' : 'green'">{{ details.state }}</nz-tag>
+              </div>
+
+              <p class="text-xs text-slate-500">
+                #{{ details.issueNumber }}
+                @if (details.url) {
+                  <a [href]="details.url" target="_blank" rel="noopener" class="ml-2 text-teal-700 hover:underline">
+                    Ver en GitHub
+                  </a>
+                }
+              </p>
+
+              <div class="text-sm text-slate-700">
+                @if (hasIssueDescription()) {
+                  <p class="whitespace-pre-wrap">{{ details.description }}</p>
+                } @else {
+                  <p class="text-slate-400">Sin descripcion.</p>
+                }
+              </div>
+            </section>
+          } @else if (hasIssueDetailsError()) {
+            <p class="text-sm text-rose-500">{{ issueDetailsError() }}</p>
+          } @else {
+            <p class="text-sm text-slate-500">Selecciona una tarea para ver detalle.</p>
+          }
+        </nz-spin>
+      }
+
+      @if (activeIssueTab() === 'meta') {
+        <nz-spin [nzSpinning]="issueDetailsLoading()">
+          @if (issueDetails(); as details) {
+            <section class="space-y-4">
+              <div>
+                <p class="mb-1 text-xs uppercase tracking-[0.2em] text-slate-500">Labels</p>
+                <div class="flex flex-wrap gap-2">
+                  @if (details.labels.length === 0) {
+                    <span class="text-sm text-slate-400">Sin labels</span>
+                  }
+                  @for (label of details.labels; track label.name) {
+                    <nz-tag [ngStyle]="issueLabelStyle(label.color)">{{ label.name }}</nz-tag>
+                  }
+                </div>
+              </div>
+
+              <div>
+                <p class="mb-1 text-xs uppercase tracking-[0.2em] text-slate-500">Assignees</p>
+                <div class="flex flex-wrap items-center gap-3">
+                  @if (details.assignees.length === 0) {
+                    <span class="text-sm text-slate-400">Sin assignees</span>
+                  }
+                  @for (assignee of details.assignees; track assignee.login) {
+                    <a
+                      class="inline-flex items-center gap-2 text-sm text-slate-700 hover:text-teal-700"
+                      [href]="assignee.profileUrl ?? null"
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      <nz-avatar [nzSrc]="assignee.avatarUrl ?? undefined" [nzText]="assignee.login[0]"></nz-avatar>
+                      <span>{{ assignee.login }}</span>
+                    </a>
+                  }
+                </div>
+              </div>
+            </section>
+          } @else if (hasIssueDetailsError()) {
+            <p class="text-sm text-rose-500">{{ issueDetailsError() }}</p>
+          } @else {
+            <p class="text-sm text-slate-500">Sin datos de issue.</p>
+          }
+        </nz-spin>
+      }
+
+      @if (activeIssueTab() === 'comments') {
+        <div class="mb-2 flex items-center justify-between">
+          <p class="m-0 text-xs uppercase tracking-[0.2em] text-slate-500">Comentarios</p>
+          <span class="text-xs text-slate-400">{{ issueComments().length }}</span>
+        </div>
+
+        <nz-spin [nzSpinning]="issueCommentsLoading()">
+          @if (hasIssueCommentsError()) {
+            <p class="text-sm text-rose-500">{{ issueCommentsError() }}</p>
+          } @else if (issueComments().length === 0) {
+            <nz-empty nzNotFoundContent="Sin comentarios"></nz-empty>
+          } @else {
+            <div class="space-y-3">
+              @for (comment of issueComments(); track comment.id) {
+                <article class="rounded-lg border border-slate-200 p-3">
+                  <div class="mb-2 flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-2">
+                      <nz-avatar
+                        [nzSrc]="comment.author?.avatarUrl ?? undefined"
+                        [nzText]="comment.author?.login?.[0] ?? '?'"
+                      ></nz-avatar>
+                      <strong class="text-sm text-slate-800">{{ comment.author?.login ?? 'unknown' }}</strong>
+                    </div>
+                    <span class="text-xs text-slate-400">{{ comment.createdAt | date: 'short' }}</span>
+                  </div>
+
+                  <p class="mb-0 whitespace-pre-wrap text-sm text-slate-700">{{ comment.body }}</p>
+                </article>
+              }
+            </div>
+          }
+        </nz-spin>
+      }
+    }
+  </ng-container>
+</nz-drawer>

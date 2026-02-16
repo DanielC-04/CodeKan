@@ -1,0 +1,45 @@
+<div class="mx-auto grid min-h-screen max-w-5xl items-center px-4 py-8">
+  <div class="grid gap-6 lg:grid-cols-2">
+    <section class="hidden rounded-2xl bg-teal-900 p-10 text-teal-50 shadow-lg lg:block">
+      <p class="text-xs uppercase tracking-[0.3em] text-teal-200">DevBoard</p>
+      <h1 class="mt-3 text-3xl font-semibold">Sincroniza tu Kanban con GitHub Issues.</h1>
+      <p class="mt-4 text-sm text-teal-100/90">
+        Gestiona tareas, estados y actualizaciones en tiempo real desde un solo flujo de trabajo.
+      </p>
+    </section>
+
+    <nz-card class="shadow-lg">
+      <h2 class="text-2xl font-semibold text-slate-900">Iniciar sesion</h2>
+      <p class="mt-2 text-sm text-slate-500">Ingresa con tu cuenta de DevBoard.</p>
+
+      <form class="mt-8" nz-form [formGroup]="form" (ngSubmit)="submit()" nzLayout="vertical">
+        <nz-form-item>
+          <nz-form-label nzFor="email">Correo</nz-form-label>
+          <nz-form-control nzErrorTip="Ingresa un correo valido">
+            <input id="email" nz-input type="email" formControlName="email" autocomplete="email" />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label nzFor="password">Contrasena</nz-form-label>
+          <nz-form-control nzErrorTip="La contrasena es obligatoria">
+            <input
+              id="password"
+              nz-input
+              type="password"
+              formControlName="password"
+              autocomplete="current-password"
+            />
+          </nz-form-control>
+        </nz-form-item>
+
+        <button nz-button nzType="primary" class="w-full">Entrar</button>
+      </form>
+
+      <p class="mt-6 text-sm text-slate-600">
+        No tienes cuenta?
+        <a routerLink="/auth/register" class="font-medium text-teal-700 hover:underline">Crear cuenta</a>
+      </p>
+    </nz-card>
+  </div>
+</div>

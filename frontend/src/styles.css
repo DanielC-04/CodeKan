@@ -1,0 +1,24 @@
+@import 'ng-zorro-antd/ng-zorro-antd.min.css';
+@import 'tailwindcss';
+
+:root {
+  --color-bg: #f4f7f9;
+  --color-surface: #ffffff;
+  --color-text: #1f2937;
+  --color-muted: #6b7280;
+  --color-primary: #0f766e;
+  --color-accent: #f59e0b;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(circle at 20% 20%, #e6fffa 0%, #f4f7f9 45%),
+    radial-gradient(circle at 80% 0%, #fff8e1 0%, transparent 30%);
+  color: var(--color-text);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}

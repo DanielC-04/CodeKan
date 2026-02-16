@@ -1,0 +1,28 @@
+:host {
+  display: block;
+}
+
+.kanban-column {
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 10px 30px -24px rgba(15, 23, 42, 0.5);
+}
+
+.kanban-list {
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.cdk-drag-preview {
+  box-sizing: border-box;
+  border-radius: 0.75rem;
+  box-shadow: 0 8px 28px -12px rgba(15, 118, 110, 0.45);
+}
+
+.cdk-drag-placeholder {
+  opacity: 0.35;
+}

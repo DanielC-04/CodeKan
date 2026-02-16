@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/DevBoard.Api/DevBoard.Api.csproj" />
+    <Project Path="src/DevBoard.Application/DevBoard.Application.csproj" />
+    <Project Path="src/DevBoard.Domain/DevBoard.Domain.csproj" />
+    <Project Path="src/DevBoard.Infrastructure/DevBoard.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/DevBoard.Domain.Tests/DevBoard.Domain.Tests.csproj" />
+    <Project Path="tests/DevBoard.IntegrationTests/DevBoard.IntegrationTests.csproj" />
+  </Folder>
+</Solution>
