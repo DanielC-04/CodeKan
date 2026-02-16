@@ -1,6 +1,6 @@
-# DevBoard
+# CodeKan
 
-DevBoard es una aplicacion Kanban con sincronizacion bidireccional con GitHub Issues.
+CodeKan es una aplicacion Kanban con sincronizacion bidireccional con GitHub Issues.
 
 - Backend: ASP.NET Core (.NET 9), EF Core, SQL Server, SignalR, JWT + refresh cookie.
 - Frontend: Angular 21, NgRx, Tailwind, NG-ZORRO.
