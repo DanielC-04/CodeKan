@@ -69,3 +69,6 @@ frontend/src/environments/environment.production.ts
 
 #Agents Docs
 .agents
+
+#Hooks
+.githooks
