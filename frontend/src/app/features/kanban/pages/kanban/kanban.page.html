@@ -1,6 +1,10 @@
-<section class="mb-4 grid gap-4 rounded-xl border border-slate-200 bg-white/90 p-4 shadow-sm lg:grid-cols-[1fr_2fr]">
-  <div class="space-y-2">
-    <p class="mb-2 text-xs uppercase tracking-[0.2em] text-slate-500">Proyecto activo</p>
+<section class="surface-panel mb-4 grid gap-4 p-4 lg:grid-cols-[minmax(220px,280px)_1fr]">
+  <div class="space-y-3">
+    <div>
+      <p class="text-[10px] font-extrabold uppercase tracking-[0.18em] text-slate-400">Proyecto activo</p>
+      <h2 class="m-0 text-sm font-bold text-slate-700">Contexto de trabajo</h2>
+    </div>
+
     <nz-select
       class="w-full"
       [ngModel]="selectedProjectId()"
@@ -12,28 +16,28 @@
       }
     </nz-select>
 
-    <button nz-button nzType="default" type="button" (click)="toggleProjectForm()">
+    <button nz-button nzType="default" type="button" (click)="toggleProjectForm()" class="w-full">
       {{ showProjectForm ? 'Cancelar proyecto' : 'Nuevo proyecto' }}
     </button>
   </div>
 
-  <form [formGroup]="taskForm" (ngSubmit)="submitTask()" class="grid gap-2">
-    <div class="flex gap-2">
+  <form [formGroup]="taskForm" (ngSubmit)="submitTask()" class="grid gap-3">
+    <div class="grid gap-2 sm:grid-cols-[1fr_auto]">
       <input
         nz-input
-        class="flex-1"
-        placeholder="Nueva tarea"
+        class="h-10"
+        placeholder="Task name (e.g. Implement OIDC flow)"
         formControlName="title"
         maxlength="120"
         [disabled]="!selectedProjectId()"
       />
-      <button nz-button nzType="primary" [disabled]="!selectedProjectId()">Crear</button>
+      <button nz-button nzType="primary" class="h-10 px-6" [disabled]="!selectedProjectId()">Crear</button>
     </div>
 
     <textarea
       nz-input
       rows="2"
-      placeholder="Descripcion (opcional)"
+      placeholder="Descripcion opcional para la issue"
       formControlName="description"
       maxlength="20000"
       [disabled]="!selectedProjectId()"
@@ -42,8 +46,12 @@
 </section>
 
 @if (showProjectForm) {
-  <section class="mb-4 rounded-xl border border-slate-200 bg-white/90 p-4 shadow-sm">
-    <p class="mb-3 text-xs uppercase tracking-[0.2em] text-slate-500">Crear proyecto</p>
+  <section class="surface-panel mb-4 p-4">
+    <div class="mb-3">
+      <p class="text-[10px] font-extrabold uppercase tracking-[0.18em] text-slate-400">Create project</p>
+      <h3 class="m-0 text-sm font-bold text-slate-700">Vincular repositorio GitHub</h3>
+    </div>
+
     <form nz-form nzLayout="vertical" [formGroup]="projectForm" (ngSubmit)="submitProject()" class="grid gap-3 md:grid-cols-2">
       <nz-form-item>
         <nz-form-label nzFor="projectName">Nombre</nz-form-label>
@@ -81,12 +89,14 @@
 }
 
 <nz-spin [nzSpinning]="isLoading()">
-  <section class="grid gap-4 md:grid-cols-3" cdkDropListGroup>
+  <section class="kanban-grid" cdkDropListGroup>
     <article class="kanban-column">
-      <div class="mb-3 flex items-center justify-between">
-        <h2 class="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">Todo</h2>
-        <span class="text-xs text-slate-400">{{ todoTasks().length }}</span>
-      </div>
+      <header class="kanban-column__header">
+        <div class="flex items-center gap-2">
+          <h2 class="kanban-column__title">To Do</h2>
+          <span class="kanban-count">{{ todoTasks().length }}</span>
+        </div>
+      </header>
 
       <div
         class="kanban-list"
@@ -97,11 +107,11 @@
         (cdkDropListDropped)="drop($event, 'Todo')"
       >
         @if (todoTasks().length === 0) {
-          <nz-empty nzNotFoundContent="Sin tareas"></nz-empty>
+          <div class="kanban-empty"><nz-empty nzNotFoundContent="Sin tareas"></nz-empty></div>
         }
 
         @for (task of todoTasks(); track task.id) {
-          <div cdkDrag [cdkDragData]="task">
+          <div cdkDrag [cdkDragData]="task" class="kanban-drag-item">
             <app-task-card [task]="task" [labels]="taskLabels(task.id)" (open)="openIssueDetails(task)"></app-task-card>
           </div>
         }
@@ -109,10 +119,12 @@
     </article>
 
     <article class="kanban-column">
-      <div class="mb-3 flex items-center justify-between">
-        <h2 class="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">In Progress</h2>
-        <span class="text-xs text-slate-400">{{ inProgressTasks().length }}</span>
-      </div>
+      <header class="kanban-column__header">
+        <div class="flex items-center gap-2">
+          <h2 class="kanban-column__title">In Progress</h2>
+          <span class="kanban-count kanban-count--active">{{ inProgressTasks().length }}</span>
+        </div>
+      </header>
 
       <div
         class="kanban-list"
@@ -123,11 +135,11 @@
         (cdkDropListDropped)="drop($event, 'InProgress')"
       >
         @if (inProgressTasks().length === 0) {
-          <nz-empty nzNotFoundContent="Sin tareas"></nz-empty>
+          <div class="kanban-empty"><nz-empty nzNotFoundContent="Sin tareas"></nz-empty></div>
         }
 
         @for (task of inProgressTasks(); track task.id) {
-          <div cdkDrag [cdkDragData]="task">
+          <div cdkDrag [cdkDragData]="task" class="kanban-drag-item">
             <app-task-card [task]="task" [labels]="taskLabels(task.id)" (open)="openIssueDetails(task)"></app-task-card>
           </div>
         }
@@ -135,10 +147,12 @@
     </article>
 
     <article class="kanban-column">
-      <div class="mb-3 flex items-center justify-between">
-        <h2 class="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">Done</h2>
-        <span class="text-xs text-slate-400">{{ doneTasks().length }}</span>
-      </div>
+      <header class="kanban-column__header">
+        <div class="flex items-center gap-2">
+          <h2 class="kanban-column__title">Done</h2>
+          <span class="kanban-count kanban-count--done">{{ doneTasks().length }}</span>
+        </div>
+      </header>
 
       <div
         class="kanban-list"
@@ -149,11 +163,11 @@
         (cdkDropListDropped)="drop($event, 'Done')"
       >
         @if (doneTasks().length === 0) {
-          <nz-empty nzNotFoundContent="Sin tareas"></nz-empty>
+          <div class="kanban-empty"><nz-empty nzNotFoundContent="Sin tareas"></nz-empty></div>
         }
 
         @for (task of doneTasks(); track task.id) {
-          <div cdkDrag [cdkDragData]="task">
+          <div cdkDrag [cdkDragData]="task" class="kanban-drag-item">
             <app-task-card [task]="task" [labels]="taskLabels(task.id)" (open)="openIssueDetails(task)"></app-task-card>
           </div>
         }
@@ -167,18 +181,45 @@
   nzTitle="Detalles de GitHub Issue"
   nzPlacement="right"
   [nzWidth]="520"
+  [nzBodyStyle]="{ padding: '20px' }"
   (nzOnClose)="closeIssueDetails()"
 >
   <ng-container *nzDrawerContent>
     @if (selectedTask()) {
-      <div class="mb-4 flex gap-2">
-        <button nz-button [nzType]="activeIssueTab() === 'summary' ? 'primary' : 'default'" (click)="setIssueTab('summary')">
+      <section class="issue-head">
+        <div class="flex items-center justify-between gap-2">
+          @if (selectedTask()?.status === 'Todo') {
+            <span class="issue-state issue-state--todo">Todo</span>
+          }
+          @if (selectedTask()?.status === 'InProgress') {
+            <span class="issue-state issue-state--progress">In Progress</span>
+          }
+          @if (selectedTask()?.status === 'Done') {
+            <span class="issue-state issue-state--done">Done</span>
+          }
+        </div>
+
+        @if (issueDetails(); as details) {
+          <h3 class="issue-title">{{ details.title }}</h3>
+          <div class="issue-meta-line">
+            <span class="font-mono">#{{ details.issueNumber }}</span>
+            @if (details.url) {
+              <a [href]="details.url" target="_blank" rel="noopener" class="issue-link">Ver en GitHub</a>
+            }
+          </div>
+        } @else {
+          <h3 class="issue-title">{{ selectedTask()?.title }}</h3>
+        }
+      </section>
+
+      <div class="issue-drawer-tabs mb-4 flex gap-2">
+        <button class="issue-tab" [class.issue-tab--active]="activeIssueTab() === 'summary'" (click)="setIssueTab('summary')">
           Resumen
         </button>
-        <button nz-button [nzType]="activeIssueTab() === 'meta' ? 'primary' : 'default'" (click)="setIssueTab('meta')">
+        <button class="issue-tab" [class.issue-tab--active]="activeIssueTab() === 'meta'" (click)="setIssueTab('meta')">
           Labels y Assignees
         </button>
-        <button nz-button [nzType]="activeIssueTab() === 'comments' ? 'primary' : 'default'" (click)="setIssueTab('comments')">
+        <button class="issue-tab" [class.issue-tab--active]="activeIssueTab() === 'comments'" (click)="setIssueTab('comments')">
           Comentarios
         </button>
       </div>
@@ -186,20 +227,11 @@
       @if (activeIssueTab() === 'summary') {
         <nz-spin [nzSpinning]="issueDetailsLoading()">
           @if (issueDetails(); as details) {
-            <section class="space-y-3">
-              <div class="flex items-center justify-between gap-2">
-                <h3 class="m-0 text-lg font-semibold text-slate-900">{{ details.title }}</h3>
+            <section class="issue-block">
+              <div class="mb-2 flex items-center justify-between gap-2">
+                <p class="issue-block-title m-0">Estado del issue</p>
                 <nz-tag [nzColor]="details.state === 'open' ? 'blue' : 'green'">{{ details.state }}</nz-tag>
               </div>
-
-              <p class="text-xs text-slate-500">
-                #{{ details.issueNumber }}
-                @if (details.url) {
-                  <a [href]="details.url" target="_blank" rel="noopener" class="ml-2 text-teal-700 hover:underline">
-                    Ver en GitHub
-                  </a>
-                }
-              </p>
 
               <div class="text-sm text-slate-700">
                 @if (hasIssueDescription()) {
@@ -221,8 +253,8 @@
         <nz-spin [nzSpinning]="issueDetailsLoading()">
           @if (issueDetails(); as details) {
             <section class="space-y-4">
-              <div>
-                <p class="mb-1 text-xs uppercase tracking-[0.2em] text-slate-500">Labels</p>
+              <div class="issue-block">
+                <p class="issue-block-title">Labels</p>
                 <div class="flex flex-wrap gap-2">
                   @if (details.labels.length === 0) {
                     <span class="text-sm text-slate-400">Sin labels</span>
@@ -233,15 +265,15 @@
                 </div>
               </div>
 
-              <div>
-                <p class="mb-1 text-xs uppercase tracking-[0.2em] text-slate-500">Assignees</p>
+              <div class="issue-block">
+                <p class="issue-block-title">Assignees</p>
                 <div class="flex flex-wrap items-center gap-3">
                   @if (details.assignees.length === 0) {
                     <span class="text-sm text-slate-400">Sin assignees</span>
                   }
                   @for (assignee of details.assignees; track assignee.login) {
                     <a
-                      class="inline-flex items-center gap-2 text-sm text-slate-700 hover:text-teal-700"
+                      class="inline-flex items-center gap-2 text-sm text-slate-700 transition-colors hover:text-[#4a6fa5]"
                       [href]="assignee.profileUrl ?? null"
                       target="_blank"
                       rel="noopener"
@@ -263,7 +295,7 @@
 
       @if (activeIssueTab() === 'comments') {
         <div class="mb-2 flex items-center justify-between">
-          <p class="m-0 text-xs uppercase tracking-[0.2em] text-slate-500">Comentarios</p>
+          <p class="m-0 text-[11px] font-extrabold uppercase tracking-[0.16em] text-slate-400">Comentarios</p>
           <span class="text-xs text-slate-400">{{ issueComments().length }}</span>
         </div>
 
@@ -275,7 +307,7 @@
           } @else {
             <div class="space-y-3">
               @for (comment of issueComments(); track comment.id) {
-                <article class="rounded-lg border border-slate-200 p-3">
+                <article class="rounded-xl border border-slate-200 bg-slate-50/80 p-3">
                   <div class="mb-2 flex items-center justify-between gap-2">
                     <div class="flex items-center gap-2">
                       <nz-avatar

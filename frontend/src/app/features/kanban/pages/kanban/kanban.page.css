@@ -2,12 +2,56 @@
   display: block;
 }
 
+.kanban-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (width >= 768px) {
+  .kanban-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
 .kanban-column {
-  border: 1px solid #e2e8f0;
-  border-radius: 0.75rem;
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.88);
-  box-shadow: 0 10px 30px -24px rgba(15, 23, 42, 0.5);
+  border: 1px solid #dbe3ee;
+  border-radius: 0.9rem;
+  padding: 0.8rem;
+  background: rgba(250, 252, 255, 0.95);
+  box-shadow: var(--shadow-card);
+}
+
+.kanban-column__header {
+  margin-bottom: 0.7rem;
+  padding: 0 0.2rem;
+}
+
+.kanban-column__title {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: #667790;
+}
+
+.kanban-count {
+  border-radius: 999px;
+  background: #e2e8f0;
+  padding: 0.12rem 0.5rem;
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: #516177;
+}
+
+.kanban-count--active {
+  background: #e6edf9;
+  color: #4a6fa5;
+}
+
+.kanban-count--done {
+  background: #e8f4f0;
+  color: #4f807b;
 }
 
 .kanban-list {
@@ -15,14 +59,129 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  border-radius: 0.7rem;
+}
+
+.kanban-empty {
+  border: 1px dashed #dbe3ee;
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.6);
+  padding: 0.4rem;
+}
+
+.kanban-drag-item {
+  border-radius: 0.75rem;
 }
 
 .cdk-drag-preview {
   box-sizing: border-box;
   border-radius: 0.75rem;
-  box-shadow: 0 8px 28px -12px rgba(15, 118, 110, 0.45);
+  box-shadow: 0 16px 30px -18px rgba(41, 62, 98, 0.42);
 }
 
 .cdk-drag-placeholder {
   opacity: 0.35;
+}
+
+.cdk-drop-list-dragging .kanban-drag-item:not(.cdk-drag-placeholder) {
+  transition: transform 180ms ease;
+}
+
+.issue-head {
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 0.85rem;
+}
+
+.issue-title {
+  margin: 0.45rem 0 0.1rem;
+  font-size: 1.1rem;
+  font-weight: 800;
+  line-height: 1.35;
+  color: #2a3a4d;
+}
+
+.issue-meta-line {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.76rem;
+  color: #708198;
+}
+
+.issue-link {
+  color: #4a6fa5;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.issue-link:hover {
+  text-decoration: underline;
+}
+
+.issue-state {
+  border-radius: 999px;
+  padding: 0.14rem 0.6rem;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.issue-state--todo {
+  background: #eef2f7;
+  color: #61728a;
+}
+
+.issue-state--progress {
+  background: #e6edf9;
+  color: #4a6fa5;
+}
+
+.issue-state--done {
+  background: #e8f4f0;
+  color: #4f807b;
+}
+
+.issue-drawer-tabs {
+  flex-wrap: wrap;
+}
+
+.issue-tab {
+  border: 1px solid #dbe3ee;
+  border-radius: 0.6rem;
+  background: #fff;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #61738d;
+  cursor: pointer;
+  transition: all 170ms ease;
+}
+
+.issue-tab:hover {
+  border-color: #c7d4e8;
+  color: #4a6fa5;
+}
+
+.issue-tab--active {
+  border-color: #b8c9e3;
+  background: #edf3fc;
+  color: #395c92;
+}
+
+.issue-block {
+  border: 1px solid #dbe3ee;
+  border-radius: 0.75rem;
+  background: #fbfdff;
+  padding: 0.8rem;
+}
+
+.issue-block-title {
+  margin: 0 0 0.45rem;
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: #6c7d95;
 }
