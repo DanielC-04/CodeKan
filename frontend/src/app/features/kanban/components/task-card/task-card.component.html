@@ -1,29 +1,26 @@
-<nz-card
-  nzSize="small"
-  class="task-card cursor-grab active:cursor-grabbing"
-  [class.task-card-done]="task().status === 'Done'"
-  (click)="openDetails()"
->
-  <div class="mb-2 flex items-start justify-between gap-2">
-    <p class="m-0 line-clamp-2 text-sm font-semibold text-slate-800">{{ task().title }}</p>
+<article class="task-card cursor-grab active:cursor-grabbing" [class.task-card-done]="task().status === 'Done'" (click)="openDetails()">
+  <div class="task-card__header">
+    <h4 class="task-card__title">{{ task().title }}</h4>
     @if (task().gitHubIssueNumber) {
-      <span class="issue-number">#{{ task().gitHubIssueNumber }}</span>
+      <span class="task-card__issue">#{{ task().gitHubIssueNumber }}</span>
     }
   </div>
 
   @if (labels().length > 0) {
-    <div class="mt-2 flex flex-wrap gap-1">
+    <div class="task-card__labels">
       @for (label of visibleLabels(); track label.name) {
-        <nz-tag class="task-label">{{ label.name }}</nz-tag>
+        <span class="task-label">{{ label.name }}</span>
       }
       @if (hiddenLabelsCount() > 0) {
-        <nz-tag class="task-label">+{{ hiddenLabelsCount() }}</nz-tag>
+        <span class="task-label">+{{ hiddenLabelsCount() }}</span>
       }
     </div>
   }
 
-  <div class="mt-3 flex items-center justify-between gap-2 border-t border-slate-100 pt-2">
-    <nz-tag [nzColor]="issueTagColor()">{{ task().status }}</nz-tag>
-    <span class="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-400">Issue</span>
+  <div class="task-card__footer">
+    <span class="task-state" [class.task-state--todo]="task().status === 'Todo'" [class.task-state--progress]="task().status === 'InProgress'" [class.task-state--done]="task().status === 'Done'">
+      {{ task().status }}
+    </span>
+    <span class="task-card__meta">GitHub Issue</span>
   </div>
-</nz-card>
+</article>

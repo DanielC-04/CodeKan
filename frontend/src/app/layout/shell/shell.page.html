@@ -1,27 +1,48 @@
-<nz-layout class="min-h-screen bg-transparent">
-  <nz-header class="h-auto! border-b border-slate-200 bg-white/90 px-0 backdrop-blur">
-    <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-      <div>
-        <p class="text-xs uppercase tracking-[0.2em] text-teal-700">DevBoard</p>
-        <h1 class="text-lg font-semibold text-slate-900">Workspace</h1>
+<div class="workspace-shell">
+  <header class="workspace-header">
+    <div class="workspace-header__inner">
+      <div class="workspace-brand-group">
+        <div class="workspace-brand">
+          <div class="workspace-brand__icon">
+            <span class="material-symbols-outlined">developer_board</span>
+          </div>
+          <h1 class="workspace-brand__title">CodeKan</h1>
+        </div>
+
+        <nav class="workspace-nav" aria-label="Main navigation">
+          <a class="workspace-nav__link" href="#">Workspace</a>
+        </nav>
       </div>
 
-      <ul nz-menu nzMode="horizontal" class="border-0 bg-transparent">
-        <li nz-menu-item routerLinkActive="ant-menu-item-selected" [routerLinkActiveOptions]="{ exact: true }">
-          <a routerLink="/kanban">Kanban</a>
-        </li>
-      </ul>
-
-      <button nz-button nzType="default" (click)="logout()">Cerrar sesion</button>
+      <div class="workspace-actions">
+        <div class="workspace-user">
+          <div class="workspace-user__avatar">{{ userEmail().slice(0, 1).toUpperCase() }}</div>
+          <button type="button" class="icon-button" (click)="logout()" aria-label="Cerrar sesion">
+            <span class="material-symbols-outlined">logout</span>
+          </button>
+        </div>
+      </div>
     </div>
-  </nz-header>
+  </header>
 
-  <nz-content class="mx-auto w-full max-w-6xl px-4 py-8">
-    <nz-card nzSize="small" class="mb-6">
-      <p class="mb-1 text-xs uppercase tracking-[0.2em] text-slate-400">Usuario activo</p>
-      <p class="text-base font-medium text-slate-900">{{ userEmail() }}</p>
-    </nz-card>
+  <main class="workspace-main">
+    <section class="workspace-user-panel">
+      <p class="workspace-user-panel__label">Usuario activo</p>
+      <p class="workspace-user-panel__value">{{ userEmail() }}</p>
+    </section>
 
     <router-outlet></router-outlet>
-  </nz-content>
-</nz-layout>
+  </main>
+
+  <footer class="workspace-footer">
+    <div class="workspace-footer__group">
+      <p><span class="material-symbols-outlined">account_tree</span>Branch: main</p>
+      <p><span class="material-symbols-outlined">sync</span>GitHub synced</p>
+    </div>
+
+    <div class="workspace-footer__group">
+      <p>Kanban realtime</p>
+      <p><span class="dot-online"></span>All systems operational</p>
+    </div>
+  </footer>
+</div>
