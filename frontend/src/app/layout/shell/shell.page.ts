@@ -1,9 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { NzLayoutModule } from 'ng-zorro-antd/layout';
-import { NzMenuModule } from 'ng-zorro-antd/menu';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzCardModule } from 'ng-zorro-antd/card';
 import { AuthService } from '../../core/auth/auth.service';
 import { AuthSessionStore } from '../../core/auth/auth-session.store';
 
@@ -12,11 +8,7 @@ import { AuthSessionStore } from '../../core/auth/auth-session.store';
   imports: [
     RouterOutlet,
     RouterLink,
-    RouterLinkActive,
-    NzLayoutModule,
-    NzMenuModule,
-    NzButtonModule,
-    NzCardModule
+    RouterLinkActive
   ],
   templateUrl: './shell.page.html',
   styleUrl: './shell.page.css',
