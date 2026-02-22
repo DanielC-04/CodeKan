@@ -3,6 +3,7 @@ using DevBoard.Application.Tasks.Dtos;
 using DevBoard.Application.Tasks.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace DevBoard.Api.Controllers;
 
@@ -15,7 +16,8 @@ public sealed class TasksController(ITaskService taskService) : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<TaskDto>), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Create(Guid projectId, [FromBody] CreateTaskRequest request, CancellationToken cancellationToken)
     {
-        var task = await taskService.CreateAsync(projectId, request, cancellationToken);
+        var ownerUserId = GetCurrentUserId();
+        var task = await taskService.CreateAsync(ownerUserId, projectId, request, cancellationToken);
         var response = ApiResponse<TaskDto>.Ok(task, "Task created successfully.");
 
         return CreatedAtAction(nameof(GetById), new { taskId = task.Id }, response);
@@ -25,7 +27,8 @@ public sealed class TasksController(ITaskService taskService) : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<IReadOnlyList<TaskDto>>), StatusCodes.Status200OK)]
     public async Task<ActionResult<ApiResponse<IReadOnlyList<TaskDto>>>> GetByProjectId(Guid projectId, CancellationToken cancellationToken)
     {
-        var tasks = await taskService.GetByProjectIdAsync(projectId, cancellationToken);
+        var ownerUserId = GetCurrentUserId();
+        var tasks = await taskService.GetByProjectIdAsync(ownerUserId, projectId, cancellationToken);
         return Ok(ApiResponse<IReadOnlyList<TaskDto>>.Ok(tasks, "Tasks fetched successfully."));
     }
 
@@ -34,7 +37,8 @@ public sealed class TasksController(ITaskService taskService) : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<TaskDto>), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ApiResponse<TaskDto>>> GetById(Guid taskId, CancellationToken cancellationToken)
     {
-        var task = await taskService.GetByIdAsync(taskId, cancellationToken);
+        var ownerUserId = GetCurrentUserId();
+        var task = await taskService.GetByIdAsync(ownerUserId, taskId, cancellationToken);
         if (task is null)
         {
             return NotFound(ApiResponse<TaskDto>.Fail("Task not found."));
@@ -52,7 +56,8 @@ public sealed class TasksController(ITaskService taskService) : ControllerBase
         [FromBody] UpdateTaskStatusRequest request,
         CancellationToken cancellationToken)
     {
-        var task = await taskService.UpdateStatusAsync(taskId, request, cancellationToken);
+        var ownerUserId = GetCurrentUserId();
+        var task = await taskService.UpdateStatusAsync(ownerUserId, taskId, request, cancellationToken);
         if (task is null)
         {
             return NotFound(ApiResponse<TaskDto>.Fail("Task not found."));
@@ -66,7 +71,8 @@ public sealed class TasksController(ITaskService taskService) : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<GitHubIssueDetailsDto>), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ApiResponse<GitHubIssueDetailsDto>>> GetIssueDetails(Guid taskId, CancellationToken cancellationToken)
     {
-        var details = await taskService.GetIssueDetailsAsync(taskId, cancellationToken);
+        var ownerUserId = GetCurrentUserId();
+        var details = await taskService.GetIssueDetailsAsync(ownerUserId, taskId, cancellationToken);
         if (details is null)
         {
             return NotFound(ApiResponse<GitHubIssueDetailsDto>.Fail("Task not found."));
@@ -80,12 +86,26 @@ public sealed class TasksController(ITaskService taskService) : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<IReadOnlyList<GitHubIssueCommentDto>>), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ApiResponse<IReadOnlyList<GitHubIssueCommentDto>>>> GetIssueComments(Guid taskId, CancellationToken cancellationToken)
     {
-        var comments = await taskService.GetIssueCommentsAsync(taskId, cancellationToken);
+        var ownerUserId = GetCurrentUserId();
+        var comments = await taskService.GetIssueCommentsAsync(ownerUserId, taskId, cancellationToken);
         if (comments is null)
         {
             return NotFound(ApiResponse<IReadOnlyList<GitHubIssueCommentDto>>.Fail("Task not found."));
         }
 
         return Ok(ApiResponse<IReadOnlyList<GitHubIssueCommentDto>>.Ok(comments, "Issue comments fetched successfully."));
+    }
+
+    private Guid GetCurrentUserId()
+    {
+        var value = User.FindFirstValue(ClaimTypes.NameIdentifier)
+            ?? User.FindFirstValue("sub");
+
+        if (!Guid.TryParse(value, out var userId))
+        {
+            throw new InvalidOperationException("Authenticated user id is missing.");
+        }
+
+        return userId;
     }
 }

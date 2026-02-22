@@ -15,10 +15,14 @@ public sealed class TaskService(
     IGitHubIssueService gitHubIssueService,
     ILogger<TaskService> logger) : ITaskService
 {
-    public async Task<TaskDto> CreateAsync(Guid projectId, CreateTaskRequest request, CancellationToken cancellationToken = default)
+    public async Task<TaskDto> CreateAsync(
+        Guid ownerUserId,
+        Guid projectId,
+        CreateTaskRequest request,
+        CancellationToken cancellationToken = default)
     {
         var project = await dbContext.Projects
-            .FirstOrDefaultAsync(item => item.Id == projectId, cancellationToken);
+            .FirstOrDefaultAsync(item => item.Id == projectId && item.OwnerUserId == ownerUserId, cancellationToken);
 
         if (project is null)
         {
@@ -69,29 +73,37 @@ public sealed class TaskService(
         return Map(task);
     }
 
-    public async Task<IReadOnlyList<TaskDto>> GetByProjectIdAsync(Guid projectId, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<TaskDto>> GetByProjectIdAsync(
+        Guid ownerUserId,
+        Guid projectId,
+        CancellationToken cancellationToken = default)
     {
         return await dbContext.Tasks
             .AsNoTracking()
-            .Where(task => task.ProjectId == projectId)
+            .Where(task => task.ProjectId == projectId && task.Project.OwnerUserId == ownerUserId)
             .OrderBy(task => task.CreatedAt)
             .Select(task => Map(task))
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<TaskDto?> GetByIdAsync(Guid taskId, CancellationToken cancellationToken = default)
+    public async Task<TaskDto?> GetByIdAsync(Guid ownerUserId, Guid taskId, CancellationToken cancellationToken = default)
     {
         var task = await dbContext.Tasks
             .AsNoTracking()
-            .FirstOrDefaultAsync(task => task.Id == taskId, cancellationToken);
+            .FirstOrDefaultAsync(task => task.Id == taskId && task.Project.OwnerUserId == ownerUserId, cancellationToken);
 
         return task is null ? null : Map(task);
     }
 
-    public async Task<TaskDto?> UpdateStatusAsync(Guid taskId, UpdateTaskStatusRequest request, CancellationToken cancellationToken = default)
+    public async Task<TaskDto?> UpdateStatusAsync(
+        Guid ownerUserId,
+        Guid taskId,
+        UpdateTaskStatusRequest request,
+        CancellationToken cancellationToken = default)
     {
         var task = await dbContext.Tasks
-            .FirstOrDefaultAsync(item => item.Id == taskId, cancellationToken);
+            .Include(item => item.Project)
+            .FirstOrDefaultAsync(item => item.Id == taskId && item.Project.OwnerUserId == ownerUserId, cancellationToken);
 
         if (task is null)
         {
@@ -107,27 +119,18 @@ public sealed class TaskService(
 
         if (currentStatus != newStatus && (newStatus == TaskStatus.Done || (currentStatus == TaskStatus.Done && newStatus == TaskStatus.InProgress)))
         {
-            var project = await dbContext.Projects
-                .AsNoTracking()
-                .FirstOrDefaultAsync(item => item.Id == task.ProjectId, cancellationToken);
-
-            if (project is null)
-            {
-                throw new InvalidOperationException("Project not found for task.");
-            }
-
             if (task.GitHubIssueNumber is null)
             {
                 throw new InvalidOperationException("Task does not have an associated GitHub issue.");
             }
 
-            var token = tokenProtector.Unprotect(project.GitHubTokenEncrypted);
+            var token = tokenProtector.Unprotect(task.Project.GitHubTokenEncrypted);
 
             if (newStatus == TaskStatus.Done)
             {
                 await gitHubIssueService.CloseIssueAsync(
-                    project.RepoOwner,
-                    project.RepoName,
+                    task.Project.RepoOwner,
+                    task.Project.RepoName,
                     task.GitHubIssueNumber.Value,
                     token,
                     cancellationToken);
@@ -135,8 +138,8 @@ public sealed class TaskService(
             else
             {
                 await gitHubIssueService.ReopenIssueAsync(
-                    project.RepoOwner,
-                    project.RepoName,
+                    task.Project.RepoOwner,
+                    task.Project.RepoName,
                     task.GitHubIssueNumber.Value,
                     token,
                     cancellationToken);
@@ -149,12 +152,15 @@ public sealed class TaskService(
         return Map(task);
     }
 
-    public async Task<GitHubIssueDetailsDto?> GetIssueDetailsAsync(Guid taskId, CancellationToken cancellationToken = default)
+    public async Task<GitHubIssueDetailsDto?> GetIssueDetailsAsync(
+        Guid ownerUserId,
+        Guid taskId,
+        CancellationToken cancellationToken = default)
     {
         var task = await dbContext.Tasks
             .Include(item => item.Project)
             .AsNoTracking()
-            .FirstOrDefaultAsync(item => item.Id == taskId, cancellationToken);
+            .FirstOrDefaultAsync(item => item.Id == taskId && item.Project.OwnerUserId == ownerUserId, cancellationToken);
 
         if (task is null)
         {
@@ -177,12 +183,15 @@ public sealed class TaskService(
         return details with { TaskId = task.Id };
     }
 
-    public async Task<IReadOnlyList<GitHubIssueCommentDto>?> GetIssueCommentsAsync(Guid taskId, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<GitHubIssueCommentDto>?> GetIssueCommentsAsync(
+        Guid ownerUserId,
+        Guid taskId,
+        CancellationToken cancellationToken = default)
     {
         var task = await dbContext.Tasks
             .Include(item => item.Project)
             .AsNoTracking()
-            .FirstOrDefaultAsync(item => item.Id == taskId, cancellationToken);
+            .FirstOrDefaultAsync(item => item.Id == taskId && item.Project.OwnerUserId == ownerUserId, cancellationToken);
 
         if (task is null)
         {
