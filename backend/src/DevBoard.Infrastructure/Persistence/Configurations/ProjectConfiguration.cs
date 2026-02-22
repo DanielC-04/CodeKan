@@ -11,6 +11,9 @@ internal sealed class ProjectConfiguration : IEntityTypeConfiguration<Project>
         builder.ToTable("Projects");
         builder.HasKey(project => project.Id);
 
+        builder.Property(project => project.OwnerUserId)
+            .IsRequired();
+
         builder.Property(project => project.Name)
             .HasMaxLength(150)
             .IsRequired();
@@ -34,5 +37,12 @@ internal sealed class ProjectConfiguration : IEntityTypeConfiguration<Project>
             .WithOne(task => task.Project)
             .HasForeignKey(task => task.ProjectId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(project => project.Owner)
+            .WithMany(user => user.Projects)
+            .HasForeignKey(project => project.OwnerUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasIndex(project => new { project.OwnerUserId, project.CreatedAt });
     }
 }

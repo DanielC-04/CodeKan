@@ -131,3 +131,4 @@ npm run test -- --watch=false
 ## Bitacora de cambios
 
 - 2026-02-22 (Seccion 1): se habilito instrumentacion de NgRx Store DevTools en frontend para inspeccionar acciones y estado durante desarrollo (`logOnly` en produccion).
+- 2026-02-22 (Seccion 2): se introdujo ownership de proyectos en backend (`Projects.OwnerUserId` + relacion con `Users`) y migracion EF para preparar aislamiento multiusuario.

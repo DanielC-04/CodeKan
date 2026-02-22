@@ -5,17 +5,20 @@ namespace DevBoard.Domain.Entities;
 public sealed class Project
 {
     public Guid Id { get; private set; }
+    public Guid OwnerUserId { get; private set; }
     public string Name { get; private set; }
     public string RepoOwner { get; private set; }
     public string RepoName { get; private set; }
     public string GitHubTokenEncrypted { get; private set; }
     public DateTime CreatedAt { get; private set; }
+    public AppUser Owner { get; private set; }
 
     private readonly List<Task> _tasks = [];
     public IReadOnlyCollection<Task> Tasks => _tasks.AsReadOnly();
 
     private Project()
     {
+        Owner = null!;
         Name = string.Empty;
         RepoOwner = string.Empty;
         RepoName = string.Empty;
@@ -23,6 +26,7 @@ public sealed class Project
     }
 
     public Project(
+        Guid ownerUserId,
         string name,
         string repoOwner,
         string repoName,
@@ -30,6 +34,8 @@ public sealed class Project
         DateTime? createdAt = null)
     {
         Id = Guid.NewGuid();
+        OwnerUserId = ValidateRequired(ownerUserId, nameof(ownerUserId));
+        Owner = null!;
         Name = ValidateRequired(name, nameof(name), 150);
         RepoOwner = ValidateRequired(repoOwner, nameof(repoOwner), 100);
         RepoName = ValidateRequired(repoName, nameof(repoName), 100);
@@ -67,5 +73,15 @@ public sealed class Project
         }
 
         return trimmed;
+    }
+
+    private static Guid ValidateRequired(Guid value, string field)
+    {
+        if (value == Guid.Empty)
+        {
+            throw new DomainException($"{field} is required.");
+        }
+
+        return value;
     }
 }

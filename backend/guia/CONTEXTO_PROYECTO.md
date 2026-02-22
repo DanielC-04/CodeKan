@@ -40,6 +40,7 @@ Se aplica Clean/Onion Architecture con dependencias dirigidas hacia adentro:
 ## Modelo de dominio planificado
 ### Project
 - Id
+- OwnerUserId
 - Name
 - RepoOwner
 - RepoName
@@ -64,6 +65,7 @@ Se aplica Clean/Onion Architecture con dependencias dirigidas hacia adentro:
 - El refresh token se maneja en cookie `HttpOnly`.
 - El registro publico crea usuarios con rol `Member` de forma fija.
 - El rol `Admin` se reserva para gestion interna del sistema.
+- Los proyectos quedan asociados a su usuario propietario por `OwnerUserId`.
 
 ## Contrato de respuesta API
 Todos los endpoints devolveran `ApiResponse<T>`:
@@ -222,6 +224,17 @@ dotnet test "backend/DevBoard.slnx"
 - Endpoints `Projects`, `Tasks` y `DevBoardHub` protegidos con autenticacion.
 - `POST /api/webhooks/github` permanece anonimo y validado por firma de GitHub.
 - Endpoint de consulta de detalles/comentarios de issue GitHub disponible para frontend.
+- Ownership de `Project` implementado en dominio e infraestructura (`OwnerUserId` + relacion con `Users`).
+- Contrato de `IProjectService` actualizado para trabajar con `ownerUserId`.
+- `ProjectsController` ahora opera con `ownerUserId` extraido del claim autenticado (`sub`/`nameidentifier`).
+- Migracion EF agregada: `AddProjectOwnerUser`.
+
+## Bitacora de cambios
+- 2026-02-22 - Seccion 2 (backend ownership)
+  - Se agrego `OwnerUserId` en la entidad `Project` y la relacion EF con `AppUser`.
+  - Se actualizo `ProjectService`/`IProjectService` para crear y consultar proyectos por propietario.
+  - Se actualizo `ProjectsController` para enviar el `ownerUserId` actual a los casos de uso.
+  - Se genero la migracion `AddProjectOwnerUser` para persistir el nuevo modelo de ownership.
 
 ## Roadmap corto
 - Sprint 1: base arquitectura + dominio + EF Core + endpoints MVP.

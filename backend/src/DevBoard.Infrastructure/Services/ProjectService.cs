@@ -9,11 +9,12 @@ namespace DevBoard.Infrastructure.Services;
 
 public sealed class ProjectService(ApplicationDbContext dbContext, ITokenProtector tokenProtector) : IProjectService
 {
-    public async Task<ProjectDto> CreateAsync(CreateProjectRequest request, CancellationToken cancellationToken = default)
+    public async Task<ProjectDto> CreateAsync(Guid ownerUserId, CreateProjectRequest request, CancellationToken cancellationToken = default)
     {
         var encryptedToken = tokenProtector.Protect(request.GitHubToken);
 
         var project = new Project(
+            ownerUserId,
             request.Name,
             request.RepoOwner,
             request.RepoName,
@@ -25,20 +26,21 @@ public sealed class ProjectService(ApplicationDbContext dbContext, ITokenProtect
         return Map(project);
     }
 
-    public async Task<IReadOnlyList<ProjectDto>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<ProjectDto>> GetAllAsync(Guid ownerUserId, CancellationToken cancellationToken = default)
     {
         return await dbContext.Projects
             .AsNoTracking()
+            .Where(project => project.OwnerUserId == ownerUserId)
             .OrderByDescending(project => project.CreatedAt)
             .Select(project => Map(project))
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<ProjectDto?> GetByIdAsync(Guid projectId, CancellationToken cancellationToken = default)
+    public async Task<ProjectDto?> GetByIdAsync(Guid ownerUserId, Guid projectId, CancellationToken cancellationToken = default)
     {
         var project = await dbContext.Projects
             .AsNoTracking()
-            .FirstOrDefaultAsync(project => project.Id == projectId, cancellationToken);
+            .FirstOrDefaultAsync(project => project.Id == projectId && project.OwnerUserId == ownerUserId, cancellationToken);
 
         return project is null ? null : Map(project);
     }

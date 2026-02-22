@@ -36,5 +36,10 @@ internal sealed class AppUserConfiguration : IEntityTypeConfiguration<AppUser>
             .WithOne(item => item.User)
             .HasForeignKey(item => item.UserId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(item => item.Projects)
+            .WithOne(item => item.Owner)
+            .HasForeignKey(item => item.OwnerUserId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

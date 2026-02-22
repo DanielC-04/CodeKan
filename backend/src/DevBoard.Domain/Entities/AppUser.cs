@@ -13,6 +13,8 @@ public sealed class AppUser
 
     private readonly List<RefreshToken> _refreshTokens = [];
     public IReadOnlyCollection<RefreshToken> RefreshTokens => _refreshTokens.AsReadOnly();
+    private readonly List<Project> _projects = [];
+    public IReadOnlyCollection<Project> Projects => _projects.AsReadOnly();
 
     private AppUser()
     {
