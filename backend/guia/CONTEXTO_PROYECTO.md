@@ -228,6 +228,9 @@ dotnet test "backend/DevBoard.slnx"
 - Contrato de `IProjectService` actualizado para trabajar con `ownerUserId`.
 - `ProjectsController` ahora opera con `ownerUserId` extraido del claim autenticado (`sub`/`nameidentifier`).
 - Migracion EF agregada: `AddProjectOwnerUser`.
+- Contrato de `ITaskService` actualizado para operar con `ownerUserId`.
+- `TasksController` ahora extrae `ownerUserId` del JWT y lo propaga a todos los casos de uso.
+- `TaskService` filtra por propietario en crear/listar/leer/mover estado/issue details/issue comments.
 
 ## Bitacora de cambios
 - 2026-02-22 - Seccion 2 (backend ownership)
@@ -235,6 +238,10 @@ dotnet test "backend/DevBoard.slnx"
   - Se actualizo `ProjectService`/`IProjectService` para crear y consultar proyectos por propietario.
   - Se actualizo `ProjectsController` para enviar el `ownerUserId` actual a los casos de uso.
   - Se genero la migracion `AddProjectOwnerUser` para persistir el nuevo modelo de ownership.
+- 2026-02-22 - Seccion 3 (backend aislamiento tasks)
+  - Se actualizo `ITaskService` para requerir `ownerUserId` en todas las operaciones.
+  - Se actualizo `TasksController` para resolver `ownerUserId` desde claims y aplicarlo en cada endpoint.
+  - Se reforzo `TaskService` para impedir acceso cruzado entre usuarios en recursos de tareas e integracion GitHub.
 
 ## Roadmap corto
 - Sprint 1: base arquitectura + dominio + EF Core + endpoints MVP.

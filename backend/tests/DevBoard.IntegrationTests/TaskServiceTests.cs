@@ -31,7 +31,7 @@ public sealed class TaskServiceTests
 
         var service = new TaskService(dbContext, tokenProtector.Object, gitHubIssueService.Object, Mock.Of<ILogger<TaskService>>());
 
-        var result = await service.CreateAsync(project.Id, new CreateTaskRequest("New task"));
+        var result = await service.CreateAsync(project.OwnerUserId, project.Id, new CreateTaskRequest("New task"));
 
         Assert.Equal("New task", result.Title);
         Assert.Equal(123, result.GitHubIssueNumber);
@@ -57,7 +57,8 @@ public sealed class TaskServiceTests
 
         var service = new TaskService(dbContext, tokenProtector.Object, gitHubIssueService.Object, Mock.Of<ILogger<TaskService>>());
 
-        await Assert.ThrowsAsync<GitHubIntegrationException>(() => service.CreateAsync(project.Id, new CreateTaskRequest("New task")));
+        await Assert.ThrowsAsync<GitHubIntegrationException>(() =>
+            service.CreateAsync(project.OwnerUserId, project.Id, new CreateTaskRequest("New task")));
         Assert.Empty(await dbContext.Tasks.ToListAsync());
     }
 
@@ -89,7 +90,7 @@ public sealed class TaskServiceTests
         var service = new TaskService(dbContext, tokenProtector.Object, gitHubIssueService.Object, Mock.Of<ILogger<TaskService>>());
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
-            service.CreateAsync(project.Id, new CreateTaskRequest("New task"), cts.Token));
+            service.CreateAsync(project.OwnerUserId, project.Id, new CreateTaskRequest("New task"), cts.Token));
 
         gitHubIssueService.Verify(
             item => item.CloseIssueAsync(project.RepoOwner, project.RepoName, 999, "plain-token", It.IsAny<CancellationToken>()),
@@ -117,7 +118,7 @@ public sealed class TaskServiceTests
 
         var service = new TaskService(dbContext, tokenProtector.Object, gitHubIssueService.Object, Mock.Of<ILogger<TaskService>>());
 
-        var result = await service.UpdateStatusAsync(taskId, new UpdateTaskStatusRequest("Done"));
+        var result = await service.UpdateStatusAsync(project.OwnerUserId, taskId, new UpdateTaskStatusRequest("Done"));
 
         Assert.NotNull(result);
         Assert.Equal("Done", result!.Status);
@@ -148,7 +149,7 @@ public sealed class TaskServiceTests
         var service = new TaskService(dbContext, tokenProtector.Object, gitHubIssueService.Object, Mock.Of<ILogger<TaskService>>());
 
         await Assert.ThrowsAsync<GitHubIntegrationException>(() =>
-            service.UpdateStatusAsync(taskId, new UpdateTaskStatusRequest("Done"))!);
+            service.UpdateStatusAsync(project.OwnerUserId, taskId, new UpdateTaskStatusRequest("Done"))!);
 
         await using var verificationContext = CreateContext(dbName);
         var persistedTask = await verificationContext.Tasks.AsNoTracking().FirstAsync(item => item.Id == taskId);
@@ -176,7 +177,7 @@ public sealed class TaskServiceTests
 
         var service = new TaskService(dbContext, tokenProtector.Object, gitHubIssueService.Object, Mock.Of<ILogger<TaskService>>());
 
-        var result = await service.UpdateStatusAsync(taskId, new UpdateTaskStatusRequest("InProgress"));
+        var result = await service.UpdateStatusAsync(project.OwnerUserId, taskId, new UpdateTaskStatusRequest("InProgress"));
 
         Assert.NotNull(result);
         Assert.Equal("InProgress", result!.Status);
@@ -207,7 +208,7 @@ public sealed class TaskServiceTests
         var service = new TaskService(dbContext, tokenProtector.Object, gitHubIssueService.Object, Mock.Of<ILogger<TaskService>>());
 
         await Assert.ThrowsAsync<GitHubIntegrationException>(() =>
-            service.UpdateStatusAsync(taskId, new UpdateTaskStatusRequest("InProgress"))!);
+            service.UpdateStatusAsync(project.OwnerUserId, taskId, new UpdateTaskStatusRequest("InProgress"))!);
 
         await using var verificationContext = CreateContext(dbName);
         var persistedTask = await verificationContext.Tasks.AsNoTracking().FirstAsync(item => item.Id == taskId);
