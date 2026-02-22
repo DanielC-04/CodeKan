@@ -11,6 +11,7 @@ public sealed class ProjectTests
         var createdAt = new DateTime(2026, 2, 8, 12, 0, 0, DateTimeKind.Utc);
 
         var project = new Project(
+            ownerUserId: Guid.NewGuid(),
             name: "DevBoard",
             repoOwner: "carra",
             repoName: "devboard",
@@ -29,6 +30,7 @@ public sealed class ProjectTests
     public void CreateProject_WithInvalidName_ThrowsDomainException()
     {
         var action = () => new Project(
+            ownerUserId: Guid.NewGuid(),
             name: " ",
             repoOwner: "carra",
             repoName: "devboard",

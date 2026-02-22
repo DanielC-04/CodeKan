@@ -3,6 +3,7 @@ using DevBoard.Application.Projects.Dtos;
 using DevBoard.Application.Projects.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace DevBoard.Api.Controllers;
 
@@ -16,7 +17,8 @@ public sealed class ProjectsController(IProjectService projectService) : Control
     [ProducesResponseType(typeof(ApiResponse<ProjectDto>), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Create([FromBody] CreateProjectRequest request, CancellationToken cancellationToken)
     {
-        var project = await projectService.CreateAsync(request, cancellationToken);
+        var ownerUserId = GetCurrentUserId();
+        var project = await projectService.CreateAsync(ownerUserId, request, cancellationToken);
         var response = ApiResponse<ProjectDto>.Ok(project, "Project created successfully.");
 
         return CreatedAtAction(nameof(GetById), new { projectId = project.Id }, response);
@@ -26,7 +28,8 @@ public sealed class ProjectsController(IProjectService projectService) : Control
     [ProducesResponseType(typeof(ApiResponse<IReadOnlyList<ProjectDto>>), StatusCodes.Status200OK)]
     public async Task<ActionResult<ApiResponse<IReadOnlyList<ProjectDto>>>> GetAll(CancellationToken cancellationToken)
     {
-        var projects = await projectService.GetAllAsync(cancellationToken);
+        var ownerUserId = GetCurrentUserId();
+        var projects = await projectService.GetAllAsync(ownerUserId, cancellationToken);
         return Ok(ApiResponse<IReadOnlyList<ProjectDto>>.Ok(projects, "Projects fetched successfully."));
     }
 
@@ -35,12 +38,26 @@ public sealed class ProjectsController(IProjectService projectService) : Control
     [ProducesResponseType(typeof(ApiResponse<ProjectDto>), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ApiResponse<ProjectDto>>> GetById(Guid projectId, CancellationToken cancellationToken)
     {
-        var project = await projectService.GetByIdAsync(projectId, cancellationToken);
+        var ownerUserId = GetCurrentUserId();
+        var project = await projectService.GetByIdAsync(ownerUserId, projectId, cancellationToken);
         if (project is null)
         {
             return NotFound(ApiResponse<ProjectDto>.Fail("Project not found."));
         }
 
         return Ok(ApiResponse<ProjectDto>.Ok(project, "Project fetched successfully."));
+    }
+
+    private Guid GetCurrentUserId()
+    {
+        var value = User.FindFirstValue(ClaimTypes.NameIdentifier)
+            ?? User.FindFirstValue("sub");
+
+        if (!Guid.TryParse(value, out var userId))
+        {
+            throw new InvalidOperationException("Authenticated user id is missing.");
+        }
+
+        return userId;
     }
 }

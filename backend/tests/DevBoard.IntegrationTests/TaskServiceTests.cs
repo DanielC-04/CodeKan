@@ -227,7 +227,7 @@ public sealed class TaskServiceTests
 
     private static DevBoard.Domain.Entities.Project SeedProject(ApplicationDbContext dbContext)
     {
-        var project = new DevBoard.Domain.Entities.Project("DevBoard", "carra", "devboard", "encrypted-token");
+        var project = new DevBoard.Domain.Entities.Project(Guid.NewGuid(), "DevBoard", "carra", "devboard", "encrypted-token");
         dbContext.Projects.Add(project);
         dbContext.SaveChanges();
         return project;
