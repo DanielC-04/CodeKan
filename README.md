@@ -4,6 +4,7 @@ CodeKan es una aplicacion Kanban con sincronizacion bidireccional con GitHub Iss
 
 - Backend: ASP.NET Core (.NET 9), EF Core, SQL Server, SignalR, JWT + refresh cookie.
 - Frontend: Angular 21, NgRx, Tailwind, NG-ZORRO.
+- Estado frontend observable con Redux DevTools (solo entorno no productivo).
 - Realtime: actualizacion de tareas por SignalR y webhooks de GitHub.
 
 ## Funcionalidades principales
@@ -126,3 +127,7 @@ npm run test -- --watch=false
 
 - Contexto backend: `backend/guia/CONTEXTO_PROYECTO.md`
 - Contexto frontend: `frontend/guia/CONTEXTO_FRONTEND.md`
+
+## Bitacora de cambios
+
+- 2026-02-22 (Seccion 1): se habilito instrumentacion de NgRx Store DevTools en frontend para inspeccionar acciones y estado durante desarrollo (`logOnly` en produccion).
