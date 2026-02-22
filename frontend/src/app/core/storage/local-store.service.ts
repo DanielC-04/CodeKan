@@ -22,4 +22,15 @@ export class LocalStoreService {
   remove(key: string): void {
     localStorage.removeItem(key);
   }
+
+  removeByPrefix(prefix: string): void {
+    const keys = this.keys().filter((key) => key.startsWith(prefix));
+    for (const key of keys) {
+      localStorage.removeItem(key);
+    }
+  }
+
+  keys(): string[] {
+    return Object.keys(localStorage);
+  }
 }

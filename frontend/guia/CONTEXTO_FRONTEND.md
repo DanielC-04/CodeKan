@@ -44,6 +44,10 @@ Se permite guardar solo estado no sensible:
 - proyecto activo,
 - snapshot de estado Kanban para rehidratacion.
 
+Scope de persistencia:
+- `devboard.activeProjectId.<userId>`
+- `devboard.kanban.<userId>.<projectId>`
+
 No guardar:
 - refresh token,
 - secretos,
@@ -108,3 +112,6 @@ No guardar:
   - Se agrego `provideStoreDevtools` en `app.config.ts`.
   - Objetivo: permitir inspeccion del estado NgRx y timeline de acciones desde la extension Redux DevTools.
   - Seguridad/operacion: en produccion se mantiene `logOnly`.
+- 2026-02-22 - Seccion 4 (cache por usuario)
+  - Se migro cache local de Kanban a claves por usuario (`userId`) para evitar mezcla de sesiones.
+  - Se agrego limpieza de cache de Kanban en `logout` y en cambio de usuario dentro del mismo navegador.

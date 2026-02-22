@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { EMPTY, catchError, concat, filter, map, of, switchMap, tap, withLatestFrom } from 'rxjs';
+import { AuthSessionStore } from '../../../core/auth/auth-session.store';
 import { LocalStoreService } from '../../../core/storage/local-store.service';
 import { UiService } from '../../../core/ui/ui.service';
 import { KanbanApiService } from '../data/kanban-api.service';
@@ -27,7 +28,8 @@ import {
 } from './kanban.actions';
 import { selectSelectedProjectId, selectTasks } from './kanban.selectors';
 
-const ACTIVE_PROJECT_KEY = 'devboard.activeProjectId';
+const ACTIVE_PROJECT_KEY_PREFIX = 'devboard.activeProjectId';
+const KANBAN_SNAPSHOT_KEY_PREFIX = 'devboard.kanban';
 
 @Injectable()
 export class KanbanEffects {
@@ -36,6 +38,7 @@ export class KanbanEffects {
   private readonly ui = inject(UiService);
   private readonly localStore = inject(LocalStoreService);
   private readonly store = inject(Store);
+  private readonly authSessionStore = inject(AuthSessionStore);
 
   readonly loadProjects$ = createEffect(() =>
     this.actions$.pipe(
@@ -76,7 +79,8 @@ export class KanbanEffects {
     this.actions$.pipe(
       ofType(loadProjectsSuccess),
       map(({ projects }) => {
-        const storedProjectId = this.localStore.get<string>(ACTIVE_PROJECT_KEY);
+        const activeProjectKey = this.getActiveProjectKey();
+        const storedProjectId = activeProjectKey ? this.localStore.get<string>(activeProjectKey) : null;
         if (storedProjectId && projects.some((project) => project.id === storedProjectId)) {
           return selectProject({ projectId: storedProjectId });
         }
@@ -101,7 +105,14 @@ export class KanbanEffects {
     () =>
       this.actions$.pipe(
         ofType(selectProject),
-        tap(({ projectId }) => this.localStore.set(ACTIVE_PROJECT_KEY, projectId))
+        tap(({ projectId }) => {
+          const activeProjectKey = this.getActiveProjectKey();
+          if (!activeProjectKey) {
+            return;
+          }
+
+          this.localStore.set(activeProjectKey, projectId);
+        })
       ),
     { dispatch: false }
   );
@@ -110,7 +121,8 @@ export class KanbanEffects {
     this.actions$.pipe(
       ofType(loadTasks),
       switchMap(({ projectId }) => {
-        const snapshot = this.localStore.get<TaskDto[]>(`devboard.kanban.${projectId}`);
+        const snapshotKey = this.getTaskSnapshotKey(projectId);
+        const snapshot = snapshotKey ? this.localStore.get<TaskDto[]>(snapshotKey) : null;
         const hydrateFromCache$ = snapshot && snapshot.length > 0 ? of(loadTasksSuccess({ tasks: snapshot })) : EMPTY;
 
         const loadFromApi$ = this.api.getTasks(projectId).pipe(
@@ -190,9 +202,24 @@ export class KanbanEffects {
             return;
           }
 
-          this.localStore.set(`devboard.kanban.${projectId}`, tasks);
+          const snapshotKey = this.getTaskSnapshotKey(projectId);
+          if (!snapshotKey) {
+            return;
+          }
+
+          this.localStore.set(snapshotKey, tasks);
         })
       ),
     { dispatch: false }
   );
+
+  private getActiveProjectKey(): string | null {
+    const userId = this.authSessionStore.user()?.id;
+    return userId ? `${ACTIVE_PROJECT_KEY_PREFIX}.${userId}` : null;
+  }
+
+  private getTaskSnapshotKey(projectId: string): string | null {
+    const userId = this.authSessionStore.user()?.id;
+    return userId ? `${KANBAN_SNAPSHOT_KEY_PREFIX}.${userId}.${projectId}` : null;
+  }
 }

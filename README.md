@@ -133,3 +133,4 @@ npm run test -- --watch=false
 - 2026-02-22 (Seccion 1): se habilito instrumentacion de NgRx Store DevTools en frontend para inspeccionar acciones y estado durante desarrollo (`logOnly` en produccion).
 - 2026-02-22 (Seccion 2): se introdujo ownership de proyectos en backend (`Projects.OwnerUserId` + relacion con `Users`) y migracion EF para preparar aislamiento multiusuario.
 - 2026-02-22 (Seccion 3): se aplico aislamiento por usuario en endpoints/servicios de tareas; todas las operaciones de `Tasks` e issue details/comments ahora se filtran por `ownerUserId` del usuario autenticado.
+- 2026-02-22 (Seccion 4): se aislo cache local del frontend por usuario (`devboard.activeProjectId.<userId>` y `devboard.kanban.<userId>.<projectId>`) y se limpio cache de Kanban en logout/cambio de cuenta.
