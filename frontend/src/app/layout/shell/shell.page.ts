@@ -1,15 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 import { AuthSessionStore } from '../../core/auth/auth-session.store';
 
 @Component({
   selector: 'app-shell-page',
-  imports: [
-    RouterOutlet,
-    RouterLink,
-    RouterLinkActive
-  ],
+  imports: [RouterOutlet],
   templateUrl: './shell.page.html',
   styleUrl: './shell.page.css',
   changeDetection: ChangeDetectionStrategy.OnPush

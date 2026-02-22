@@ -100,3 +100,11 @@ No guardar:
 - Detalle de issue GitHub integrado en UI (descripcion, labels, assignees, comentarios read-only).
 - Panel de issue con tabs y cache por tarea para mejorar rendimiento al reabrir.
 - Cobertura de pruebas frontend extendida para Kanban y tarjetas.
+- Instrumentacion de NgRx Store DevTools activa para debugging en desarrollo (`logOnly` cuando `production=true`).
+
+## Bitacora de cambios
+
+- 2026-02-22 - Seccion 1 (frontend observabilidad)
+  - Se agrego `provideStoreDevtools` en `app.config.ts`.
+  - Objetivo: permitir inspeccion del estado NgRx y timeline de acciones desde la extension Redux DevTools.
+  - Seguridad/operacion: en produccion se mantiene `logOnly`.
