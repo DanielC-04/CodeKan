@@ -2,17 +2,26 @@ using DevBoard.Application.Auth.Dtos;
 using DevBoard.Application.Auth.Models;
 using DevBoard.Application.Auth.Services;
 using DevBoard.Application.Common;
+using DevBoard.Infrastructure.GitHub;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using System.Security.Cryptography;
 
 namespace DevBoard.Api.Controllers;
 
 [ApiController]
 [Route("api/auth")]
 [AllowAnonymous]
-public sealed class AuthController(IAuthService authService) : ControllerBase
+public sealed class AuthController(
+    IAuthService authService,
+    IGitHubOAuthClient gitHubOAuthClient,
+    IOptions<GitHubOAuthOptions> gitHubOAuthOptions) : ControllerBase
 {
     private const string RefreshCookieName = "devboard_refresh";
+    private const string GitHubOAuthStateCookieName = "devboard_github_oauth_state";
+    private static readonly TimeSpan OAuthStateLifetime = TimeSpan.FromMinutes(10);
+    private readonly GitHubOAuthOptions _gitHubOAuthOptions = gitHubOAuthOptions.Value;
 
     [HttpPost("register")]
     [ProducesResponseType(typeof(ApiResponse<AuthTokenResponse>), StatusCodes.Status201Created)]
@@ -77,6 +86,44 @@ public sealed class AuthController(IAuthService authService) : ControllerBase
         return Ok(ApiResponse<object>.Ok(new { }, "Session revoked successfully."));
     }
 
+    [HttpGet("github/start")]
+    [ProducesResponseType(StatusCodes.Status302Found)]
+    public IActionResult StartGitHubLogin()
+    {
+        var state = GenerateOAuthState();
+        SetGitHubStateCookie(state);
+
+        var authorizationUrl = gitHubOAuthClient.BuildAuthorizationUrl(state);
+        return Redirect(authorizationUrl);
+    }
+
+    [HttpGet("github/callback")]
+    [ProducesResponseType(StatusCodes.Status302Found)]
+    public async Task<IActionResult> GitHubCallback(
+        [FromQuery] string? code,
+        [FromQuery] string? state,
+        CancellationToken cancellationToken)
+    {
+        var expectedState = Request.Cookies[GitHubOAuthStateCookieName];
+        DeleteGitHubStateCookie();
+
+        if (string.IsNullOrWhiteSpace(code) || string.IsNullOrWhiteSpace(state) || expectedState != state)
+        {
+            return Redirect(_gitHubOAuthOptions.FrontendErrorUrl);
+        }
+
+        try
+        {
+            var session = await authService.LoginWithGitHubAsync(code, HttpContext.Connection.RemoteIpAddress?.ToString(), cancellationToken);
+            SetRefreshCookie(session.RefreshToken, session.RefreshTokenExpiresAt);
+            return Redirect(_gitHubOAuthOptions.FrontendSuccessUrl);
+        }
+        catch
+        {
+            return Redirect(_gitHubOAuthOptions.FrontendErrorUrl);
+        }
+    }
+
     private void SetRefreshCookie(string refreshToken, DateTime expiresAt)
     {
         Response.Cookies.Append(RefreshCookieName, refreshToken, new CookieOptions
@@ -94,4 +141,34 @@ public sealed class AuthController(IAuthService authService) : ControllerBase
             session.AccessToken,
             session.AccessTokenExpiresAt,
             new AuthUserDto(session.UserId, session.Email, session.Role));
+
+    private void SetGitHubStateCookie(string state)
+    {
+        Response.Cookies.Append(GitHubOAuthStateCookieName, state, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = Request.IsHttps,
+            SameSite = SameSiteMode.Lax,
+            Expires = DateTimeOffset.UtcNow.Add(OAuthStateLifetime),
+            Path = "/api/auth/github"
+        });
+    }
+
+    private void DeleteGitHubStateCookie()
+    {
+        Response.Cookies.Delete(GitHubOAuthStateCookieName, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = Request.IsHttps,
+            SameSite = SameSiteMode.Lax,
+            Path = "/api/auth/github"
+        });
+    }
+
+    private static string GenerateOAuthState()
+    {
+        Span<byte> bytes = stackalloc byte[32];
+        RandomNumberGenerator.Fill(bytes);
+        return Convert.ToHexString(bytes);
+    }
 }
