@@ -1,16 +1,12 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { NzFormModule } from 'ng-zorro-antd/form';
-import { NzInputModule } from 'ng-zorro-antd/input';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzCardModule } from 'ng-zorro-antd/card';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { UiService } from '../../../../core/ui/ui.service';
 
 @Component({
   selector: 'app-login-page',
-  imports: [ReactiveFormsModule, RouterLink, NzFormModule, NzInputModule, NzButtonModule, NzCardModule],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './login.page.html',
   styleUrl: './login.page.css',
   changeDetection: ChangeDetectionStrategy.OnPush
