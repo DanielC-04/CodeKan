@@ -231,6 +231,8 @@ dotnet test "backend/DevBoard.slnx"
 - Contrato de `ITaskService` actualizado para operar con `ownerUserId`.
 - `TasksController` ahora extrae `ownerUserId` del JWT y lo propaga a todos los casos de uso.
 - `TaskService` filtra por propietario en crear/listar/leer/mover estado/issue details/issue comments.
+- Configuracion base de GitHub OAuth incorporada (`GitHubOAuthOptions`) para login social sin alterar flujo actual de Projects/Tasks.
+- Cliente OAuth de GitHub incorporado (`IGitHubOAuthClient` + `GitHubOAuthClient`) para authorize URL e intercambio `code` por identidad GitHub (perfil + email verificado).
 
 ## Bitacora de cambios
 - 2026-02-22 - Seccion 2 (backend ownership)
@@ -245,6 +247,10 @@ dotnet test "backend/DevBoard.slnx"
 - 2026-02-22 - Seccion 5 (regresion multiusuario)
   - Se agregaron pruebas de integracion HTTP para validar que usuarios distintos no puedan consultar recursos ajenos (`Projects`/`Tasks` devuelven `404`).
   - Objetivo: prevenir regresiones de aislamiento multiusuario en cambios futuros.
+- 2026-02-22 - Seccion A (base OAuth GitHub)
+  - Se agrego `GitHubOAuthOptions` y binding de configuracion en `DependencyInjection`.
+  - Se agrego `IGitHubOAuthClient` y su implementacion `GitHubOAuthClient` para authorize URL, token exchange y resolucion de email verificado.
+  - Se actualizaron settings base para incluir bloque `GitHubOAuth` en entorno local.
 
 ## Roadmap corto
 - Sprint 1: base arquitectura + dominio + EF Core + endpoints MVP.
