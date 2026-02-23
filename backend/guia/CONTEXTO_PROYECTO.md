@@ -56,6 +56,14 @@ Se aplica Clean/Onion Architecture con dependencias dirigidas hacia adentro:
 - CreatedAt
 - CompletedAt (nullable)
 
+### ExternalIdentity
+- Id
+- UserId
+- Provider
+- ProviderUserId
+- Email
+- LinkedAt
+
 ## Seguridad definida
 - El token de GitHub NO se guarda en plano.
 - Se cifra en Infrastructure y se persiste como `GitHubTokenEncrypted`.
@@ -233,6 +241,7 @@ dotnet test "backend/DevBoard.slnx"
 - `TaskService` filtra por propietario en crear/listar/leer/mover estado/issue details/issue comments.
 - Configuracion base de GitHub OAuth incorporada (`GitHubOAuthOptions`) para login social sin alterar flujo actual de Projects/Tasks.
 - Cliente OAuth de GitHub incorporado (`IGitHubOAuthClient` + `GitHubOAuthClient`) para authorize URL e intercambio `code` por identidad GitHub (perfil + email verificado).
+- Modelo de identidad externa implementado (`ExternalIdentity`) para vincular proveedores OAuth a usuarios internos y evitar duplicados.
 
 ## Bitacora de cambios
 - 2026-02-22 - Seccion 2 (backend ownership)
@@ -251,6 +260,10 @@ dotnet test "backend/DevBoard.slnx"
   - Se agrego `GitHubOAuthOptions` y binding de configuracion en `DependencyInjection`.
   - Se agrego `IGitHubOAuthClient` y su implementacion `GitHubOAuthClient` para authorize URL, token exchange y resolucion de email verificado.
   - Se actualizaron settings base para incluir bloque `GitHubOAuth` en entorno local.
+- 2026-02-23 - Seccion B (modelo external identity)
+  - Se agrego entidad `ExternalIdentity` en Domain y su configuracion EF Core.
+  - Se agrego relacion `AppUser` -> `ExternalIdentities` para soportar login social sin duplicar cuentas.
+  - Se genero migracion `AddExternalIdentities` con indice unico (`Provider`, `ProviderUserId`).
 
 ## Roadmap corto
 - Sprint 1: base arquitectura + dominio + EF Core + endpoints MVP.
