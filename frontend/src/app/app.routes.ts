@@ -12,6 +12,11 @@ export const routes: Routes = [
       import('./features/auth/pages/register/register.page').then((m) => m.RegisterPage)
   },
   {
+    path: 'auth/github/callback',
+    loadComponent: () =>
+      import('./features/auth/pages/github-callback/github-callback.page').then((m) => m.GitHubCallbackPage)
+  },
+  {
     path: '',
     canActivate: [authGuard],
     loadComponent: () => import('./layout/shell/shell.page').then((m) => m.ShellPage),

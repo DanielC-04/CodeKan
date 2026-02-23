@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -20,6 +20,8 @@ export class LoginPage {
   private readonly authService = inject(AuthService);
   private readonly uiService = inject(UiService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  readonly hasOAuthError = this.route.snapshot.queryParamMap.get('oauth') === 'error';
 
   readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -38,5 +40,9 @@ export class LoginPage {
         void this.router.navigate(['/kanban']);
       }
     });
+  }
+
+  loginWithGitHub(): void {
+    this.authService.startGitHubLogin();
   }
 }
