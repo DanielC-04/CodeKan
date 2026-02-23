@@ -115,3 +115,6 @@ No guardar:
 - 2026-02-22 - Seccion 4 (cache por usuario)
   - Se migro cache local de Kanban a claves por usuario (`userId`) para evitar mezcla de sesiones.
   - Se agrego limpieza de cache de Kanban en `logout` y en cambio de usuario dentro del mismo navegador.
+- 2026-02-22 - Seccion 5 (regresion cache)
+  - Se agrego prueba unitaria de `AuthSessionStore` para verificar limpieza de cache Kanban al cambiar de cuenta.
+  - Objetivo: evitar reintroduccion de mezcla de estado entre usuarios en el mismo navegador.

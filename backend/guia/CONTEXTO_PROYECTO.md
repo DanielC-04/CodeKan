@@ -242,6 +242,9 @@ dotnet test "backend/DevBoard.slnx"
   - Se actualizo `ITaskService` para requerir `ownerUserId` en todas las operaciones.
   - Se actualizo `TasksController` para resolver `ownerUserId` desde claims y aplicarlo en cada endpoint.
   - Se reforzo `TaskService` para impedir acceso cruzado entre usuarios en recursos de tareas e integracion GitHub.
+- 2026-02-22 - Seccion 5 (regresion multiusuario)
+  - Se agregaron pruebas de integracion HTTP para validar que usuarios distintos no puedan consultar recursos ajenos (`Projects`/`Tasks` devuelven `404`).
+  - Objetivo: prevenir regresiones de aislamiento multiusuario en cambios futuros.
 
 ## Roadmap corto
 - Sprint 1: base arquitectura + dominio + EF Core + endpoints MVP.
