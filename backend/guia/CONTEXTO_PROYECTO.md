@@ -103,6 +103,8 @@ Todos los endpoints devolveran `ApiResponse<T>`:
 - `DELETE /api/tasks/{taskId}`
 - `POST /api/webhooks/github`
 - `GET /hubs/devboard/negotiate` (handshake SignalR)
+- `GET /api/auth/github/start`
+- `GET /api/auth/github/callback`
 
 ## Flujo funcional completo del proyecto
 1. Usuario crea un Project vinculado a un repo GitHub.
@@ -243,6 +245,7 @@ dotnet test "backend/DevBoard.slnx"
 - Cliente OAuth de GitHub incorporado (`IGitHubOAuthClient` + `GitHubOAuthClient`) para authorize URL e intercambio `code` por identidad GitHub (perfil + email verificado).
 - Modelo de identidad externa implementado (`ExternalIdentity`) para vincular proveedores OAuth a usuarios internos y evitar duplicados.
 - Politica de vinculacion OAuth implementada en `AuthService`: prioridad por `ProviderUserId`, fallback por email verificado, y alta de usuario si no existe.
+- Flujo OAuth web expuesto en `AuthController` (`/api/auth/github/start` y `/api/auth/github/callback`) con validacion anti-CSRF por `state` en cookie temporal.
 
 ## Bitacora de cambios
 - 2026-02-22 - Seccion 2 (backend ownership)
@@ -269,6 +272,10 @@ dotnet test "backend/DevBoard.slnx"
   - Se agrego `LoginWithGitHubAsync` en `IAuthService`.
   - `AuthService` implementa vinculacion por `ProviderUserId`, luego por email verificado y crea usuario local si es necesario.
   - El flujo de sesion se mantiene consistente con el login actual (JWT + refresh cookie).
+- 2026-02-23 - Seccion D (controller OAuth)
+  - Se agrego endpoint `GET /api/auth/github/start` para iniciar OAuth y redirigir a GitHub.
+  - Se agrego endpoint `GET /api/auth/github/callback` para validar `state`, completar login y redirigir al frontend.
+  - Se agrego cookie temporal de `state` (`devboard_github_oauth_state`) para hardening CSRF del flujo OAuth.
 
 ## Roadmap corto
 - Sprint 1: base arquitectura + dominio + EF Core + endpoints MVP.

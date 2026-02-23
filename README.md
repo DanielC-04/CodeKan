@@ -140,3 +140,4 @@ npm run test -- --watch=false
 - 2026-02-22 (Seccion A): se agrego configuracion base de GitHub OAuth en backend (`GitHubOAuthOptions` + `IGitHubOAuthClient`) para construir authorize URL e intercambiar `code` por identidad GitHub verificada.
 - 2026-02-23 (Seccion B): se agrego el modelo `ExternalIdentity` (GitHub y futuros proveedores) con migracion EF y relacion a `Users`, incluyendo indice unico por (`Provider`, `ProviderUserId`) para prevenir cuentas duplicadas.
 - 2026-02-23 (Seccion C): `AuthService` incorporo politica de vinculacion GitHub (`providerUserId -> email verificado -> alta`) y nuevo contrato `LoginWithGitHubAsync`, manteniendo emision de JWT y refresh cookie igual al login actual.
+- 2026-02-23 (Seccion D): se habilito flujo web OAuth en `AuthController` con `GET /api/auth/github/start` y `GET /api/auth/github/callback`, validacion de `state` via cookie temporal y redireccion segura a frontend success/error.
