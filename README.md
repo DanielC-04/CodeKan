@@ -138,3 +138,4 @@ npm run test -- --watch=false
 - 2026-02-22 (Seccion 4): se aislo cache local del frontend por usuario (`devboard.activeProjectId.<userId>` y `devboard.kanban.<userId>.<projectId>`) y se limpio cache de Kanban en logout/cambio de cuenta.
 - 2026-02-22 (Seccion 5): se agregaron pruebas de regresion para aislamiento multiusuario (API: acceso cruzado entre cuentas retorna `404`; frontend: limpieza de cache al cambiar de usuario).
 - 2026-02-22 (Seccion A): se agrego configuracion base de GitHub OAuth en backend (`GitHubOAuthOptions` + `IGitHubOAuthClient`) para construir authorize URL e intercambiar `code` por identidad GitHub verificada.
+- 2026-02-23 (Seccion B): se agrego el modelo `ExternalIdentity` (GitHub y futuros proveedores) con migracion EF y relacion a `Users`, incluyendo indice unico por (`Provider`, `ProviderUserId`) para prevenir cuentas duplicadas.

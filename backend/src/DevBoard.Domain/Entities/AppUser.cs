@@ -15,6 +15,8 @@ public sealed class AppUser
     public IReadOnlyCollection<RefreshToken> RefreshTokens => _refreshTokens.AsReadOnly();
     private readonly List<Project> _projects = [];
     public IReadOnlyCollection<Project> Projects => _projects.AsReadOnly();
+    private readonly List<ExternalIdentity> _externalIdentities = [];
+    public IReadOnlyCollection<ExternalIdentity> ExternalIdentities => _externalIdentities.AsReadOnly();
 
     private AppUser()
     {
