@@ -27,6 +27,7 @@ public static class DependencyInjection
             options.UseSqlServer(connectionString));
 
         services.Configure<GitHubWebhookOptions>(configuration.GetSection("GitHub"));
+        services.Configure<GitHubOAuthOptions>(configuration.GetSection("GitHubOAuth"));
         services.Configure<JwtOptions>(configuration.GetSection("Jwt"));
 
         services.AddScoped<IAuthService, AuthService>();
@@ -35,6 +36,7 @@ public static class DependencyInjection
         services.AddScoped<IProjectService, ProjectService>();
         services.AddScoped<ITaskService, TaskService>();
         services.AddScoped<IGitHubIssueService, GitHubIssueService>();
+        services.AddHttpClient<IGitHubOAuthClient, GitHubOAuthClient>();
         services.AddScoped<GitHubSignatureValidator>();
         services.AddScoped<IGitHubWebhookService, GitHubWebhookService>();
         services.AddSingleton<ITokenProtector, DataProtectionTokenProtector>();
