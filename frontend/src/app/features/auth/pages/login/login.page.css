@@ -1,3 +1,434 @@
 :host {
   display: block;
 }
+
+.login-shell {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  background: #020617;
+  color: #94a3b8;
+  font-family: 'Space Mono', monospace;
+}
+
+.login-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.login-bg--network {
+  background-image: url('https://images.unsplash.com/photo-1510511459019-5dee997dd1db?auto=format&fit=crop&q=80&w=2070');
+  background-size: cover;
+  background-position: center;
+  filter: contrast(1.5) brightness(0.1) grayscale(0.5);
+  opacity: 0.3;
+}
+
+.login-bg--grid {
+  background-size: 40px 40px;
+  background-image:
+    linear-gradient(to right, rgba(30, 41, 59, 0.5) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(30, 41, 59, 0.5) 1px, transparent 1px);
+  mask-image: radial-gradient(circle at center, #000 40%, transparent 100%);
+}
+
+.login-bg--overlay {
+  background: radial-gradient(circle at center, rgba(15, 23, 42, 0.6) 0%, rgba(2, 6, 23, 1) 100%);
+}
+
+.login-wrap {
+  position: relative;
+  z-index: 1;
+  margin: 0 auto;
+  max-width: 760px;
+  padding: 2rem 1rem;
+}
+
+.hero-panel {
+  margin-bottom: 2rem;
+}
+
+.hero-kicker {
+  margin-bottom: 1.3rem;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: #0ea5e9;
+  opacity: 0.85;
+}
+
+.hero-kicker .material-symbols-outlined {
+  font-size: 1.45rem;
+}
+
+.hero-title {
+  margin: 0;
+  color: #f1f5f9;
+  font-size: clamp(1.3rem, 3.2vw, 2rem);
+  line-height: 1.35;
+}
+
+.hero-title span {
+  color: #2dd4bf;
+}
+
+.hero-copy {
+  margin-top: 0.85rem;
+  max-width: 620px;
+  border-left: 2px solid rgba(17, 94, 89, 0.35);
+  padding-left: 0.9rem;
+  font-size: 0.77rem;
+  color: #64748b;
+}
+
+.terminal-window {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(45, 212, 191, 0.2);
+  border-radius: 2px;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+}
+
+.scanline {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: rgba(45, 212, 191, 0.05);
+}
+
+.terminal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(45, 212, 191, 0.2);
+  background: rgba(20, 184, 166, 0.05);
+  padding: 0.56rem 1rem;
+}
+
+.terminal-header p {
+  margin: 0;
+  font-size: 0.56rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.terminal-dots {
+  display: flex;
+  gap: 0.34rem;
+}
+
+.terminal-dots span {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: #334155;
+}
+
+.terminal-body {
+  padding: 1.25rem;
+}
+
+.intro-block h2 {
+  margin: 0;
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+.intro-block p {
+  margin: 0.3rem 0 0;
+  font-size: 0.67rem;
+  letter-spacing: 0.05em;
+  color: rgba(45, 212, 191, 0.6);
+}
+
+.oauth-error {
+  margin: 1rem 0;
+  border: 1px solid rgba(248, 113, 113, 0.4);
+  background: rgba(127, 29, 29, 0.25);
+  padding: 0.5rem 0.65rem;
+  font-size: 0.68rem;
+  color: #fda4af;
+}
+
+.btn-angled {
+  position: relative;
+  clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
+}
+
+.btn-angled::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 15px;
+  height: 15px;
+  clip-path: polygon(0 0, 100% 0, 100% 100%);
+  background: rgba(0, 0, 0, 0.14);
+}
+
+.btn-github,
+.btn-submit {
+  width: 100%;
+  border: 0;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.btn-github {
+  margin-top: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  background: #f1f5f9;
+  padding: 0.9rem 1rem;
+  color: #0f172a;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  transition: all 180ms ease;
+  box-shadow: 4px 4px 0 rgba(255, 255, 255, 0.2);
+}
+
+.btn-github:hover {
+  transform: translateY(-2px);
+  background: #fff;
+  box-shadow: 6px 6px 0 rgba(255, 255, 255, 0.3);
+}
+
+.btn-github svg {
+  width: 1.2rem;
+  height: 1.2rem;
+  transition: transform 190ms ease;
+}
+
+.btn-github:hover svg {
+  transform: rotate(12deg);
+}
+
+.divider {
+  position: relative;
+  margin: 1.2rem 0;
+  text-align: center;
+}
+
+.divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  border-top: 1px solid rgba(17, 94, 89, 0.35);
+}
+
+.divider span {
+  position: relative;
+  background: #020617;
+  padding: 0 0.65rem;
+  color: rgba(45, 212, 191, 0.45);
+  font-size: 0.58rem;
+  font-weight: 700;
+}
+
+.login-form {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.login-form label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: rgba(45, 212, 191, 0.7);
+  font-size: 0.59rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.login-form label span {
+  opacity: 0.55;
+}
+
+.login-form input[type='email'],
+.login-form input[type='password'] {
+  border: 1px solid rgba(45, 212, 191, 0.2);
+  border-radius: 2px;
+  background: rgba(15, 23, 42, 0.75);
+  color: #2dd4bf;
+  padding: 0.7rem 0.85rem;
+  font-size: 0.78rem;
+  font-family: 'Space Mono', monospace;
+}
+
+.login-form input[type='email']::placeholder,
+.login-form input[type='password']::placeholder {
+  color: #334155;
+}
+
+.login-form input[type='email']:focus,
+.login-form input[type='password']:focus {
+  outline: 0;
+  border-color: #2dd4bf;
+  box-shadow: 0 0 0 1px #2dd4bf;
+}
+
+.form-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.remember-me {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #64748b;
+  font-size: 0.62rem;
+  letter-spacing: 0.05em;
+}
+
+.remember-me input[type='checkbox'] {
+  width: 0.9rem;
+  height: 0.9rem;
+  accent-color: #2dd4bf;
+}
+
+.form-row a {
+  color: #2dd4bf;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-decoration-color: rgba(45, 212, 191, 0.35);
+  text-underline-offset: 3px;
+}
+
+.form-row a:hover {
+  color: #5eead4;
+}
+
+.btn-submit {
+  margin-top: 0.4rem;
+  background: #ccff00;
+  padding: 0.9rem 1rem;
+  color: #0f172a;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  transition: all 180ms ease;
+  box-shadow: 4px 4px 0 rgba(204, 255, 0, 0.32);
+}
+
+.btn-submit:hover {
+  transform: translateY(-2px);
+  background: #b7eb00;
+  box-shadow: 6px 6px 0 rgba(204, 255, 0, 0.4);
+}
+
+.terminal-footer {
+  margin-top: 1rem;
+  border-top: 1px solid rgba(17, 94, 89, 0.2);
+  padding-top: 0.8rem;
+  text-align: center;
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.terminal-footer a {
+  margin-left: 0.45rem;
+  color: #2dd4bf;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.terminal-footer a:hover {
+  color: #fff;
+}
+
+.status-row {
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  opacity: 0.45;
+}
+
+.status-row > div:first-child {
+  display: flex;
+  gap: 0.65rem;
+}
+
+.status-row span {
+  color: #2dd4bf;
+  font-size: 0.56rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.status-bars {
+  display: flex;
+  align-items: center;
+  gap: 0.18rem;
+}
+
+.status-bars span:nth-child(1) {
+  width: 0.36rem;
+  height: 0.36rem;
+  background: #ccff00;
+  border-radius: 999px;
+  animation: pulse 1.2s infinite;
+}
+
+.status-bars span:nth-child(2) {
+  width: 2rem;
+  height: 0.36rem;
+  background: rgba(45, 212, 191, 0.45);
+}
+
+.status-bars span:nth-child(3) {
+  width: 1rem;
+  height: 0.36rem;
+  background: rgba(45, 212, 191, 0.25);
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@media (width >= 768px) {
+  .login-wrap {
+    padding: 2.8rem 1.5rem;
+  }
+
+  .terminal-body {
+    padding: 2rem 2.2rem;
+  }
+}

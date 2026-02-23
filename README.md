@@ -142,3 +142,4 @@ npm run test -- --watch=false
 - 2026-02-23 (Seccion C): `AuthService` incorporo politica de vinculacion GitHub (`providerUserId -> email verificado -> alta`) y nuevo contrato `LoginWithGitHubAsync`, manteniendo emision de JWT y refresh cookie igual al login actual.
 - 2026-02-23 (Seccion D): se habilito flujo web OAuth en `AuthController` con `GET /api/auth/github/start` y `GET /api/auth/github/callback`, validacion de `state` via cookie temporal y redireccion segura a frontend success/error.
 - 2026-02-23 (Seccion E): frontend incorpora boton "Continuar con GitHub" en login y nueva ruta `auth/github/callback` que finaliza sesion via `refresh()` y redirige al Kanban.
+- 2026-02-23 (UI Login): se aplico nuevo diseno visual tipo terminal en la pagina de login manteniendo funcionalidad existente (email/password, GitHub OAuth, error OAuth y acceso a registro).

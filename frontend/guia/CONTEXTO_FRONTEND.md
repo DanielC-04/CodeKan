@@ -123,3 +123,7 @@ No guardar:
   - Se agrego boton de inicio con GitHub en `login.page`.
   - Se agrego ruta/pagina `auth/github/callback` para completar sesion mediante `refresh()` y redirigir a `/kanban`.
   - Se incorporo feedback de error OAuth en pantalla de login (`?oauth=error`).
+- 2026-02-23 - UI login terminal
+  - Se rediseno `login.page` para replicar el estilo terminal entregado en diseno sin alterar el flujo de autenticacion.
+  - Se mantuvo separacion clara entre estructura (`login.page.html`) y estilos (`login.page.css`) con enfoque Tailwind + CSS de componente.
+  - Se agrego fuente `Space Mono` en `index.html` para consistencia visual del login.
