@@ -97,6 +97,7 @@ No guardar:
 - Ruteo base implementado con rutas de auth y shell protegido.
 - Paginas base creadas: `login`, `register`, `kanban`.
 - Auth frontend conectado al backend JWT con refresh por cookie HttpOnly.
+- Login social GitHub habilitado en UI (inicio desde login y callback dedicado para finalizar sesion).
 - Persistencia local inicial implementada para sesion de frontend y estado no sensible.
 - NG-ZORRO configurado en locale espanol para formularios, layout y mensajeria UI.
 - Store NgRx Kanban activo con effects, cache local por proyecto y actualizacion optimista.
@@ -118,3 +119,7 @@ No guardar:
 - 2026-02-22 - Seccion 5 (regresion cache)
   - Se agrego prueba unitaria de `AuthSessionStore` para verificar limpieza de cache Kanban al cambiar de cuenta.
   - Objetivo: evitar reintroduccion de mezcla de estado entre usuarios en el mismo navegador.
+- 2026-02-23 - Seccion E (github login frontend)
+  - Se agrego boton de inicio con GitHub en `login.page`.
+  - Se agrego ruta/pagina `auth/github/callback` para completar sesion mediante `refresh()` y redirigir a `/kanban`.
+  - Se incorporo feedback de error OAuth en pantalla de login (`?oauth=error`).

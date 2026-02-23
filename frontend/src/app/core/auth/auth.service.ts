@@ -52,6 +52,10 @@ export class AuthService {
       .pipe(tap(() => this.sessionStore.clearSession()));
   }
 
+  startGitHubLogin(): void {
+    window.location.assign(`${this.authUrl}/github/start`);
+  }
+
   private applySession(response: ApiResponse<AuthTokenResponse>): void {
     this.sessionStore.setSession(response.data.accessToken, response.data.user);
   }
