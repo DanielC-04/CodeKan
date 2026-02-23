@@ -242,6 +242,7 @@ dotnet test "backend/DevBoard.slnx"
 - Configuracion base de GitHub OAuth incorporada (`GitHubOAuthOptions`) para login social sin alterar flujo actual de Projects/Tasks.
 - Cliente OAuth de GitHub incorporado (`IGitHubOAuthClient` + `GitHubOAuthClient`) para authorize URL e intercambio `code` por identidad GitHub (perfil + email verificado).
 - Modelo de identidad externa implementado (`ExternalIdentity`) para vincular proveedores OAuth a usuarios internos y evitar duplicados.
+- Politica de vinculacion OAuth implementada en `AuthService`: prioridad por `ProviderUserId`, fallback por email verificado, y alta de usuario si no existe.
 
 ## Bitacora de cambios
 - 2026-02-22 - Seccion 2 (backend ownership)
@@ -264,6 +265,10 @@ dotnet test "backend/DevBoard.slnx"
   - Se agrego entidad `ExternalIdentity` en Domain y su configuracion EF Core.
   - Se agrego relacion `AppUser` -> `ExternalIdentities` para soportar login social sin duplicar cuentas.
   - Se genero migracion `AddExternalIdentities` con indice unico (`Provider`, `ProviderUserId`).
+- 2026-02-23 - Seccion C (politica auth GitHub)
+  - Se agrego `LoginWithGitHubAsync` en `IAuthService`.
+  - `AuthService` implementa vinculacion por `ProviderUserId`, luego por email verificado y crea usuario local si es necesario.
+  - El flujo de sesion se mantiene consistente con el login actual (JWT + refresh cookie).
 
 ## Roadmap corto
 - Sprint 1: base arquitectura + dominio + EF Core + endpoints MVP.

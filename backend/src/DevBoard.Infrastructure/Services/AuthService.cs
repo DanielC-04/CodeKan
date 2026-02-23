@@ -16,9 +16,11 @@ public sealed class AuthService(
     ApplicationDbContext dbContext,
     IPasswordHasher passwordHasher,
     IJwtTokenService jwtTokenService,
+    IGitHubOAuthClient gitHubOAuthClient,
     IOptions<JwtOptions> jwtOptions) : IAuthService
 {
     private const string DefaultUserRole = "Member";
+    private const string GitHubProvider = "github";
     private readonly JwtOptions _jwtOptions = jwtOptions.Value;
 
     public async Task<AuthSession> RegisterAsync(RegisterRequest request, string? ipAddress, CancellationToken cancellationToken = default)
@@ -55,6 +57,58 @@ public sealed class AuthService(
         if (user is null || !user.IsActive || !passwordHasher.VerifyPassword(request.Password, user.PasswordHash))
         {
             throw new InvalidOperationException("Invalid credentials.");
+        }
+
+        var session = CreateSession(user, ipAddress);
+        dbContext.RefreshTokens.Add(new RefreshTokenEntity(user.Id, HashToken(session.RefreshToken), session.RefreshTokenExpiresAt, ipAddress));
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        return session;
+    }
+
+    public async Task<AuthSession> LoginWithGitHubAsync(string code, string? ipAddress, CancellationToken cancellationToken = default)
+    {
+        var identity = await gitHubOAuthClient.ExchangeCodeForIdentityAsync(code, cancellationToken);
+        var normalizedEmail = NormalizeEmail(identity.Email);
+
+        var externalIdentity = await dbContext.ExternalIdentities
+            .Include(item => item.User)
+            .FirstOrDefaultAsync(
+                item => item.Provider == GitHubProvider && item.ProviderUserId == identity.ProviderUserId,
+                cancellationToken);
+
+        AppUserEntity user;
+
+        if (externalIdentity is not null)
+        {
+            user = externalIdentity.User;
+        }
+        else
+        {
+            user = await dbContext.Users
+                .FirstOrDefaultAsync(item => item.Email == normalizedEmail, cancellationToken)
+                ?? CreateUserFromGitHubEmail(normalizedEmail);
+
+            if (user.Id == Guid.Empty)
+            {
+                throw new InvalidOperationException("Unable to resolve user for GitHub login.");
+            }
+
+            if (dbContext.Entry(user).State == EntityState.Detached)
+            {
+                dbContext.Users.Add(user);
+            }
+
+            dbContext.ExternalIdentities.Add(new Domain.Entities.ExternalIdentity(
+                user.Id,
+                GitHubProvider,
+                identity.ProviderUserId,
+                normalizedEmail));
+        }
+
+        if (!user.IsActive)
+        {
+            throw new InvalidOperationException("User is inactive.");
         }
 
         var session = CreateSession(user, ipAddress);
@@ -146,5 +200,12 @@ public sealed class AuthService(
         var bytes = Encoding.UTF8.GetBytes(token.Trim());
         var hash = SHA256.HashData(bytes);
         return Convert.ToHexString(hash);
+    }
+
+    private AppUserEntity CreateUserFromGitHubEmail(string email)
+    {
+        var generatedPassword = $"gh-{Guid.NewGuid():N}-{DateTime.UtcNow.Ticks}";
+        var passwordHash = passwordHasher.HashPassword(generatedPassword);
+        return new AppUserEntity(email, passwordHash, DefaultUserRole);
     }
 }

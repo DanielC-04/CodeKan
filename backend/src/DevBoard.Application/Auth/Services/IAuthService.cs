@@ -7,6 +7,7 @@ public interface IAuthService
 {
     Task<AuthSession> RegisterAsync(RegisterRequest request, string? ipAddress, CancellationToken cancellationToken = default);
     Task<AuthSession> LoginAsync(LoginRequest request, string? ipAddress, CancellationToken cancellationToken = default);
+    Task<AuthSession> LoginWithGitHubAsync(string code, string? ipAddress, CancellationToken cancellationToken = default);
     Task<AuthSession> RefreshAsync(string refreshToken, string? ipAddress, CancellationToken cancellationToken = default);
     Task RevokeAsync(string refreshToken, CancellationToken cancellationToken = default);
 }
