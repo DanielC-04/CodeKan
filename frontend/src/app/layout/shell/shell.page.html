@@ -1,48 +1,54 @@
-<div class="workspace-shell">
-  <header class="workspace-header">
-    <div class="workspace-header__inner">
-      <div class="workspace-brand-group">
-        <div class="workspace-brand">
-          <div class="workspace-brand__icon">
-            <span class="material-symbols-outlined">developer_board</span>
-          </div>
-          <h1 class="workspace-brand__title">CodeKan</h1>
-        </div>
+<div class="terminal-root min-h-screen relative flex flex-col font-mono overflow-hidden">
+  <div class="fixed inset-0 grid-bg z-0 pointer-events-none"></div>
+  <div class="fixed inset-0 vignette-overlay z-10 pointer-events-none"></div>
 
-        <nav class="workspace-nav" aria-label="Main navigation">
-          <a class="workspace-nav__link" href="#">Workspace</a>
-        </nav>
+  <nav class="relative z-30 w-full border-b border-[#115e59]/20 bg-[#020617]/90 backdrop-blur-sm">
+    <div class="max-w-480 mx-auto px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <div class="flex items-center justify-center w-8 h-8 bg-[#0ea5e9]/10 rounded-sm border border-[#0ea5e9]/30">
+          <span class="material-symbols-outlined text-[#0ea5e9] text-lg">view_kanban</span>
+        </div>
+        <span class="text-lg font-bold tracking-widest text-slate-100">CODEKAN<span class="text-[#2dd4bf] animate-pulse">_</span></span>
+        <span class="text-xs text-[#2dd4bf]/50 ml-2 px-2 py-0.5 border border-[#2dd4bf]/20 rounded-full">v1.0.0-beta</span>
       </div>
 
-      <div class="workspace-actions">
-        <div class="workspace-user">
-          <div class="workspace-user__avatar">{{ userEmail().slice(0, 1).toUpperCase() }}</div>
-          <button type="button" class="icon-button" (click)="logout()" aria-label="Cerrar sesion">
-            <span class="material-symbols-outlined">logout</span>
+      <div class="flex items-center gap-6">
+        <a class="text-xs uppercase tracking-wider text-[#2dd4bf] hover:text-[#2dd4bf] transition-colors" href="#">Workspace</a>
+
+        <div class="flex items-center gap-3 pl-6 border-l border-[#2dd4bf]/20">
+          <div class="w-8 h-8 rounded-full bg-[#101929] border border-[#2dd4bf]/30 flex items-center justify-center text-[#2dd4bf] font-bold text-xs">
+            {{ userEmail().slice(0, 2).toUpperCase() }}
+          </div>
+          <button class="text-slate-500 hover:text-white transition-colors" (click)="logout()" type="button" aria-label="Cerrar sesion">
+            <span class="material-symbols-outlined text-xl">logout</span>
           </button>
         </div>
       </div>
     </div>
-  </header>
+  </nav>
 
-  <main class="workspace-main">
-    <section class="workspace-user-panel">
-      <p class="workspace-user-panel__label">Usuario activo</p>
-      <p class="workspace-user-panel__value">{{ userEmail() }}</p>
-    </section>
-
+  <main class="relative z-20 flex-1 overflow-y-auto overflow-x-hidden p-6 md:p-8">
     <router-outlet></router-outlet>
   </main>
 
-  <footer class="workspace-footer">
-    <div class="workspace-footer__group">
-      <p><span class="material-symbols-outlined">account_tree</span>Branch: main</p>
-      <p><span class="material-symbols-outlined">sync</span>GitHub synced</p>
+  <footer class="fixed bottom-0 left-0 w-full flex justify-between items-center bg-[#020617] border-t border-[#115e59]/20 px-4 py-1.5 z-40 text-[10px] uppercase font-bold text-[#2dd4bf] tracking-widest">
+    <div class="flex items-center space-x-6">
+      <div class="flex items-center gap-2 hover:text-white cursor-pointer transition-colors">
+        <span class="material-symbols-outlined text-sm">call_split</span>
+        <span>Tareas</span>
+      </div>
+      <div class="flex items-center gap-2 hover:text-white cursor-pointer transition-colors">
+        <span class="material-symbols-outlined text-sm terminal-spin">sync</span>
+        <span>Github Synced</span>
+      </div>
     </div>
 
-    <div class="workspace-footer__group">
-      <p>Kanban realtime</p>
-      <p><span class="dot-online"></span>All systems operational</p>
+    <div class="flex items-center space-x-6">
+      <span class="opacity-60 hidden md:block">CodeKan</span>
+      <div class="flex items-center gap-2">
+        <span class="w-1.5 h-1.5 bg-[#ccff00] rounded-full terminal-pulse shadow-[0_0_5px_#ccff00]"></span>
+        <span>Sistema Kanban</span>
+      </div>
     </div>
   </footer>
 </div>

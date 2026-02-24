@@ -1,6 +1,6 @@
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { NzAvatarModule } from 'ng-zorro-antd/avatar';
@@ -15,6 +15,7 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
 import { finalize } from 'rxjs';
 import { SignalrService } from '../../../../core/signalr/signalr.service';
 import { UiService } from '../../../../core/ui/ui.service';
+import { AuthSessionStore } from '../../../../core/auth/auth-session.store';
 import { KanbanApiService } from '../../data/kanban-api.service';
 import { TaskCardComponent } from '../../components/task-card/task-card.component';
 import { IssueComment, IssueDetails, IssueLabel, TaskDto, TaskStatus, TaskUpdatedEvent } from '../../models/kanban.models';
@@ -63,6 +64,7 @@ export class KanbanPage implements OnInit, OnDestroy {
   private readonly signalr = inject(SignalrService);
   private readonly ui = inject(UiService);
   private readonly kanbanApi = inject(KanbanApiService);
+  private readonly authSessionStore = inject(AuthSessionStore);
 
   readonly projects = this.store.selectSignal(selectProjects);
   readonly selectedProjectId = this.store.selectSignal(selectSelectedProjectId);
@@ -70,6 +72,7 @@ export class KanbanPage implements OnInit, OnDestroy {
   readonly inProgressTasks = this.store.selectSignal(selectInProgressTasks);
   readonly doneTasks = this.store.selectSignal(selectDoneTasks);
   readonly isLoading = this.store.selectSignal(selectKanbanLoading);
+  readonly activeUserEmail = computed(() => this.authSessionStore.user()?.email ?? 'unknown@local');
 
   readonly todoListId = 'todo-list';
   readonly inProgressListId = 'in-progress-list';
