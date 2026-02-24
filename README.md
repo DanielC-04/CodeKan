@@ -144,3 +144,4 @@ npm run test -- --watch=false
 - 2026-02-23 (Seccion E): frontend incorpora boton "Continuar con GitHub" en login y nueva ruta `auth/github/callback` que finaliza sesion via `refresh()` y redirige al Kanban.
 - 2026-02-23 (UI Login): se aplico nuevo diseno visual tipo terminal en la pagina de login manteniendo funcionalidad existente (email/password, GitHub OAuth, error OAuth y acceso a registro).
 - 2026-02-23 (UI Register): se aplico diseno terminal en la pagina de registro manteniendo flujo funcional de alta por email/password; por decision UX se retiro el boton GitHub de registro y se concentro en login.
+- 2026-02-24 (UI Kanban Terminal): se aplico tema terminal integral al area autenticada (shell, tablero Kanban, tarjetas y drawer de issue) siguiendo `.diseño.txt`, preservando la logica existente de NgRx, drag-and-drop, SignalR y flujos de proyecto/tareas.

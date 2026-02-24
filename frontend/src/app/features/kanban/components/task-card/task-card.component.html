@@ -21,6 +21,6 @@
     <span class="task-state" [class.task-state--todo]="task().status === 'Todo'" [class.task-state--progress]="task().status === 'InProgress'" [class.task-state--done]="task().status === 'Done'">
       {{ task().status }}
     </span>
-    <span class="task-card__meta">GitHub Issue</span>
+    <span class="task-card__meta"><span class="material-symbols-outlined">code</span>GitHub Issue</span>
   </div>
 </article>

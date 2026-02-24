@@ -1,341 +1,320 @@
-<section class="board-controls">
-  <div class="board-controls__project">
-    <p class="controls-label">Active project</p>
-    <nz-select
-      class="w-full"
-      [ngModel]="selectedProjectId()"
-      (ngModelChange)="changeProject($event)"
-      nzPlaceHolder="Selecciona un proyecto"
-    >
-      @for (project of projects(); track project.id) {
-        <nz-option [nzValue]="project.id" [nzLabel]="project.name"></nz-option>
-      }
-    </nz-select>
+<div class="max-w-480 mx-auto space-y-6">
+  <div class="grid grid-cols-12 gap-6">
+    <div class="col-span-12 terminal-card p-4 rounded-sm">
+      <div class="flex flex-col">
+        <span class="text-[10px] uppercase tracking-widest text-[#2dd4bf]/70 font-bold mb-1">Usuario Activo</span>
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-[#ccff00] text-base">verified_user</span>
+          <span class="text-slate-100 text-lg">{{ activeUserEmail() }}</span>
+        </div>
+      </div>
+    </div>
 
-    <button nz-button nzType="default" type="button" (click)="toggleProjectForm()" class="w-full">
-      {{ showProjectForm ? 'Cancelar proyecto' : 'Nuevo proyecto' }}
-    </button>
+    <div class="col-span-12 grid grid-cols-1 md:grid-cols-12 gap-6">
+      <div class="md:col-span-4 terminal-card p-5 rounded-sm flex flex-col justify-between">
+        <div>
+          <span class="text-[10px] uppercase tracking-widest text-[#2dd4bf]/70 font-bold block mb-3">Active Project</span>
+          <div class="relative group">
+            <nz-select
+              class="w-full terminal-select"
+              [ngModel]="selectedProjectId()"
+              (ngModelChange)="changeProject($event)"
+              nzPlaceHolder="Selecciona un proyecto"
+            >
+              @for (project of projects(); track project.id) {
+                <nz-option [nzValue]="project.id" [nzLabel]="project.name"></nz-option>
+              }
+            </nz-select>
+            <div class="terminal-select-arrow">
+              <span class="material-symbols-outlined text-sm">expand_more</span>
+            </div>
+          </div>
+        </div>
+
+        <button class="mt-4 w-full py-2 border border-dashed border-slate-600 text-slate-500 hover:border-[#2dd4bf] hover:text-[#2dd4bf] hover:bg-[#2dd4bf]/5 transition-all text-xs uppercase tracking-widest flex items-center justify-center gap-2" type="button" (click)="toggleProjectForm()">
+          <span class="material-symbols-outlined text-base">add</span>
+          {{ showProjectForm ? 'Cancelar Proyecto' : 'Nuevo Proyecto' }}
+        </button>
+      </div>
+
+      <div class="md:col-span-8 terminal-card p-5 rounded-sm">
+        <div class="flex items-center gap-2 mb-3 border-b border-[#2dd4bf]/10 pb-2">
+          <span class="material-symbols-outlined text-[#ccff00] text-sm">flash_on</span>
+          <span class="text-[10px] uppercase tracking-widest text-[#2dd4bf]/70 font-bold">Quick Add Task</span>
+        </div>
+
+        <form [formGroup]="taskForm" (ngSubmit)="submitTask()" class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+          <div class="lg:col-span-3 space-y-3">
+            <div class="relative">
+              <span class="absolute left-3 top-2.5 text-[#2dd4bf]/50 material-symbols-outlined text-sm">edit_square</span>
+              <input
+                class="w-full terminal-input text-sm py-2 pl-9 pr-3 rounded-none"
+                type="text"
+                placeholder="Task name (e.g. Implement OIDC flow)..."
+                formControlName="title"
+                maxlength="120"
+                [disabled]="!selectedProjectId()"
+              />
+            </div>
+
+            <textarea
+              class="w-full terminal-input text-xs py-2 px-3 rounded-none resize-none"
+              rows="1"
+              placeholder="Descripcion opcional para la issue"
+              formControlName="description"
+              maxlength="20000"
+              [disabled]="!selectedProjectId()"
+            ></textarea>
+          </div>
+
+          <div class="lg:col-span-1 flex items-start">
+            <button class="btn-angled w-full h-10 flex items-center justify-center gap-2 bg-[#ccff00] hover:bg-[#b3e600] text-black font-bold text-xs uppercase tracking-widest transition-all shadow-[2px_2px_0px_rgba(255,255,255,0.1)] active:translate-y-0.5 active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed" [disabled]="!selectedProjectId()" type="submit">
+              <span>Create</span>
+              <span class="material-symbols-outlined text-sm font-bold">arrow_forward</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 
-  <form [formGroup]="taskForm" (ngSubmit)="submitTask()" class="board-controls__task-form">
-    <div class="controls-label">Quick add task</div>
-    <div class="quick-add-row">
-      <span class="material-symbols-outlined quick-add-icon">add_task</span>
-      <input
-        nz-input
-        class="quick-add-input"
-        placeholder="Task name (e.g. Implement OIDC flow)..."
-        formControlName="title"
-        maxlength="120"
-        [disabled]="!selectedProjectId()"
-      />
-      <button nz-button nzType="primary" class="quick-add-button" [disabled]="!selectedProjectId()">Create</button>
-    </div>
-
-    <textarea
-      nz-input
-      rows="2"
-      placeholder="Descripcion opcional para la issue"
-      formControlName="description"
-      maxlength="20000"
-      [disabled]="!selectedProjectId()"
-    ></textarea>
-  </form>
-</section>
-
-@if (showProjectForm) {
-  <section class="surface-panel mb-4 p-4">
-    <div class="mb-3">
-      <p class="text-[10px] font-extrabold uppercase tracking-[0.18em] text-slate-400">Create project</p>
-      <h3 class="m-0 text-sm font-bold text-slate-700">Vincular repositorio GitHub</h3>
-    </div>
-
-    <form nz-form nzLayout="vertical" [formGroup]="projectForm" (ngSubmit)="submitProject()" class="grid gap-3 md:grid-cols-2">
-      <nz-form-item>
-        <nz-form-label nzFor="projectName">Nombre</nz-form-label>
-        <nz-form-control nzErrorTip="Nombre obligatorio">
-          <input id="projectName" nz-input formControlName="name" maxlength="150" />
-        </nz-form-control>
-      </nz-form-item>
-
-      <nz-form-item>
-        <nz-form-label nzFor="repoOwner">Repo owner</nz-form-label>
-        <nz-form-control nzErrorTip="Repo owner obligatorio">
-          <input id="repoOwner" nz-input formControlName="repoOwner" maxlength="100" />
-        </nz-form-control>
-      </nz-form-item>
-
-      <nz-form-item>
-        <nz-form-label nzFor="repoName">Repo name</nz-form-label>
-        <nz-form-control nzErrorTip="Repo name obligatorio">
-          <input id="repoName" nz-input formControlName="repoName" maxlength="100" />
-        </nz-form-control>
-      </nz-form-item>
-
-      <nz-form-item>
-        <nz-form-label nzFor="token">GitHub token</nz-form-label>
-        <nz-form-control nzErrorTip="Token obligatorio">
-          <input id="token" nz-input type="password" formControlName="gitHubToken" maxlength="4000" />
-        </nz-form-control>
-      </nz-form-item>
-
-      <div class="md:col-span-2">
-        <button nz-button nzType="primary">Crear proyecto</button>
+  @if (showProjectForm) {
+    <section class="terminal-card p-5 rounded-sm">
+      <div class="flex items-center gap-2 mb-3 border-b border-[#2dd4bf]/10 pb-2">
+        <span class="material-symbols-outlined text-[#ccff00] text-sm">account_tree</span>
+        <span class="text-[10px] uppercase tracking-widest text-[#2dd4bf]/70 font-bold">Create Project</span>
       </div>
-    </form>
-  </section>
-}
 
-<nz-spin [nzSpinning]="isLoading()">
-  <section class="kanban-grid" cdkDropListGroup>
-    <article class="kanban-column">
-      <header class="kanban-column__header">
-        <div class="kanban-column__title-row">
-          <span class="kanban-dot"></span>
-          <h2 class="kanban-column__title">To Do</h2>
-          <span class="kanban-count">{{ todoTasks().length }}</span>
-        </div>
-        <button type="button" class="column-menu" aria-label="More options">
-          <span class="material-symbols-outlined">more_horiz</span>
-        </button>
-      </header>
+      <form nz-form nzLayout="vertical" [formGroup]="projectForm" (ngSubmit)="submitProject()" class="project-form-grid">
+        <nz-form-item>
+          <nz-form-label nzFor="projectName">Nombre</nz-form-label>
+          <nz-form-control nzErrorTip="Nombre obligatorio">
+            <input id="projectName" nz-input formControlName="name" maxlength="150" class="terminal-input" />
+          </nz-form-control>
+        </nz-form-item>
 
-      <div
-        class="kanban-list"
-        cdkDropList
-        [id]="todoListId"
-        [cdkDropListConnectedTo]="connectedDropLists"
-        [cdkDropListData]="todoTasks()"
-        (cdkDropListDropped)="drop($event, 'Todo')"
-      >
-        @if (todoTasks().length === 0) {
-          <div class="kanban-empty">Drop here</div>
-        }
+        <nz-form-item>
+          <nz-form-label nzFor="repoOwner">Repo owner</nz-form-label>
+          <nz-form-control nzErrorTip="Repo owner obligatorio">
+            <input id="repoOwner" nz-input formControlName="repoOwner" maxlength="100" class="terminal-input" />
+          </nz-form-control>
+        </nz-form-item>
 
-        @for (task of todoTasks(); track task.id) {
-          <div cdkDrag [cdkDragData]="task" class="kanban-drag-item">
-            <app-task-card [task]="task" [labels]="taskLabels(task.id)" (open)="openIssueDetails(task)"></app-task-card>
+        <nz-form-item>
+          <nz-form-label nzFor="repoName">Repo name</nz-form-label>
+          <nz-form-control nzErrorTip="Repo name obligatorio">
+            <input id="repoName" nz-input formControlName="repoName" maxlength="100" class="terminal-input" />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label nzFor="token">GitHub token</nz-form-label>
+          <nz-form-control nzErrorTip="Token obligatorio">
+            <input id="token" nz-input type="password" formControlName="gitHubToken" maxlength="4000" class="terminal-input" />
+          </nz-form-control>
+        </nz-form-item>
+
+        <button class="btn-angled w-full md:w-auto h-10 px-4 flex items-center justify-center gap-2 bg-[#ccff00] hover:bg-[#b3e600] text-black font-bold text-xs uppercase tracking-widest transition-all" type="submit">Crear Proyecto</button>
+      </form>
+    </section>
+  }
+
+  <nz-spin [nzSpinning]="isLoading()">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 h-full" cdkDropListGroup>
+      <div class="terminal-card rounded-sm flex flex-col h-full kanban-col">
+        <div class="p-3 border-b border-[#2dd4bf]/10 flex items-center justify-between bg-white/5">
+          <div class="flex items-center gap-2">
+            <div class="w-2 h-2 rounded-full bg-slate-500"></div>
+            <span class="text-xs font-bold text-slate-300 uppercase tracking-wider">To Do</span>
+            <span class="ml-1 px-1.5 py-0.5 bg-slate-800 text-slate-400 text-[10px] rounded border border-slate-700">{{ todoTasks().length }}</span>
           </div>
-        }
-      </div>
-    </article>
-
-    <article class="kanban-column">
-      <header class="kanban-column__header">
-        <div class="kanban-column__title-row">
-          <span class="kanban-dot kanban-dot--active"></span>
-          <h2 class="kanban-column__title">In Progress</h2>
-          <span class="kanban-count kanban-count--active">{{ inProgressTasks().length }}</span>
-        </div>
-        <button type="button" class="column-menu" aria-label="More options">
-          <span class="material-symbols-outlined">more_horiz</span>
-        </button>
-      </header>
-
-      <div
-        class="kanban-list"
-        cdkDropList
-        [id]="inProgressListId"
-        [cdkDropListConnectedTo]="connectedDropLists"
-        [cdkDropListData]="inProgressTasks()"
-        (cdkDropListDropped)="drop($event, 'InProgress')"
-      >
-        @if (inProgressTasks().length === 0) {
-          <div class="kanban-empty">Drop here</div>
-        }
-
-        @for (task of inProgressTasks(); track task.id) {
-          <div cdkDrag [cdkDragData]="task" class="kanban-drag-item">
-            <app-task-card [task]="task" [labels]="taskLabels(task.id)" (open)="openIssueDetails(task)"></app-task-card>
-          </div>
-        }
-      </div>
-    </article>
-
-    <article class="kanban-column">
-      <header class="kanban-column__header">
-        <div class="kanban-column__title-row">
-          <span class="kanban-dot kanban-dot--done"></span>
-          <h2 class="kanban-column__title">Done</h2>
-          <span class="kanban-count kanban-count--done">{{ doneTasks().length }}</span>
-        </div>
-        <button type="button" class="column-menu" aria-label="More options">
-          <span class="material-symbols-outlined">more_horiz</span>
-        </button>
-      </header>
-
-      <div
-        class="kanban-list"
-        cdkDropList
-        [id]="doneListId"
-        [cdkDropListConnectedTo]="connectedDropLists"
-        [cdkDropListData]="doneTasks()"
-        (cdkDropListDropped)="drop($event, 'Done')"
-      >
-        @if (doneTasks().length === 0) {
-          <div class="kanban-empty">Drop here</div>
-        }
-
-        @for (task of doneTasks(); track task.id) {
-          <div cdkDrag [cdkDragData]="task" class="kanban-drag-item">
-            <app-task-card [task]="task" [labels]="taskLabels(task.id)" (open)="openIssueDetails(task)"></app-task-card>
-          </div>
-        }
-      </div>
-    </article>
-  </section>
-</nz-spin>
-
-<nz-drawer
-  [nzVisible]="issueDrawerOpen()"
-  nzTitle="Detalles de GitHub Issue"
-  nzPlacement="right"
-  [nzWidth]="520"
-  [nzBodyStyle]="{ padding: '20px' }"
-  (nzOnClose)="closeIssueDetails()"
->
-  <ng-container *nzDrawerContent>
-    @if (selectedTask()) {
-      <section class="issue-head">
-        <div class="flex items-center justify-between gap-2">
-          @if (selectedTask()?.status === 'Todo') {
-            <span class="issue-state issue-state--todo">Todo</span>
-          }
-          @if (selectedTask()?.status === 'InProgress') {
-            <span class="issue-state issue-state--progress">In Progress</span>
-          }
-          @if (selectedTask()?.status === 'Done') {
-            <span class="issue-state issue-state--done">Done</span>
-          }
+          <button class="text-slate-600 hover:text-white" type="button"><span class="material-symbols-outlined text-base">more_horiz</span></button>
         </div>
 
-        @if (issueDetails(); as details) {
-          <h3 class="issue-title">{{ details.title }}</h3>
-          <div class="issue-meta-line">
-            <span class="font-mono">#{{ details.issueNumber }}</span>
-            @if (details.url) {
-              <a [href]="details.url" target="_blank" rel="noopener" class="issue-link">Ver en GitHub</a>
+        <div class="p-3 flex-1 bg-black/20" cdkDropList [id]="todoListId" [cdkDropListConnectedTo]="connectedDropLists" [cdkDropListData]="todoTasks()" (cdkDropListDropped)="drop($event, 'Todo')">
+          @if (todoTasks().length === 0) {
+            <div class="border-2 border-dashed border-slate-800 rounded-sm h-24 flex items-center justify-center text-slate-700 text-xs uppercase tracking-widest">Drop Here</div>
+          }
+          <div class="space-y-3">
+            @for (task of todoTasks(); track task.id) {
+              <div cdkDrag [cdkDragData]="task" class="kanban-drag-item">
+                <app-task-card [task]="task" [labels]="taskLabels(task.id)" (open)="openIssueDetails(task)"></app-task-card>
+              </div>
             }
           </div>
-        } @else {
-          <h3 class="issue-title">{{ selectedTask()?.title }}</h3>
-        }
-      </section>
-
-      <div class="issue-drawer-tabs mb-4 flex gap-2">
-        <button class="issue-tab" [class.issue-tab--active]="activeIssueTab() === 'summary'" (click)="setIssueTab('summary')">
-          Resumen
-        </button>
-        <button class="issue-tab" [class.issue-tab--active]="activeIssueTab() === 'meta'" (click)="setIssueTab('meta')">
-          Labels y Assignees
-        </button>
-        <button class="issue-tab" [class.issue-tab--active]="activeIssueTab() === 'comments'" (click)="setIssueTab('comments')">
-          Comentarios
-        </button>
+        </div>
       </div>
 
-      @if (activeIssueTab() === 'summary') {
-        <nz-spin [nzSpinning]="issueDetailsLoading()">
-          @if (issueDetails(); as details) {
-            <section class="issue-block">
-              <div class="mb-2 flex items-center justify-between gap-2">
-                <p class="issue-block-title m-0">Estado del issue</p>
-                <nz-tag [nzColor]="details.state === 'open' ? 'blue' : 'green'">{{ details.state }}</nz-tag>
-              </div>
-
-              <div class="text-sm text-slate-700">
-                @if (hasIssueDescription()) {
-                  <p class="whitespace-pre-wrap">{{ details.description }}</p>
-                } @else {
-                  <p class="text-slate-400">Sin descripcion.</p>
-                }
-              </div>
-            </section>
-          } @else if (hasIssueDetailsError()) {
-            <p class="text-sm text-rose-500">{{ issueDetailsError() }}</p>
-          } @else {
-            <p class="text-sm text-slate-500">Selecciona una tarea para ver detalle.</p>
-          }
-        </nz-spin>
-      }
-
-      @if (activeIssueTab() === 'meta') {
-        <nz-spin [nzSpinning]="issueDetailsLoading()">
-          @if (issueDetails(); as details) {
-            <section class="space-y-4">
-              <div class="issue-block">
-                <p class="issue-block-title">Labels</p>
-                <div class="flex flex-wrap gap-2">
-                  @if (details.labels.length === 0) {
-                    <span class="text-sm text-slate-400">Sin labels</span>
-                  }
-                  @for (label of details.labels; track label.name) {
-                    <nz-tag [ngStyle]="issueLabelStyle(label.color)">{{ label.name }}</nz-tag>
-                  }
-                </div>
-              </div>
-
-              <div class="issue-block">
-                <p class="issue-block-title">Assignees</p>
-                <div class="flex flex-wrap items-center gap-3">
-                  @if (details.assignees.length === 0) {
-                    <span class="text-sm text-slate-400">Sin assignees</span>
-                  }
-                  @for (assignee of details.assignees; track assignee.login) {
-                    <a
-                      class="inline-flex items-center gap-2 text-sm text-slate-700 transition-colors hover:text-[#4a6fa5]"
-                      [href]="assignee.profileUrl ?? null"
-                      target="_blank"
-                      rel="noopener"
-                    >
-                      <nz-avatar [nzSrc]="assignee.avatarUrl ?? undefined" [nzText]="assignee.login[0]"></nz-avatar>
-                      <span>{{ assignee.login }}</span>
-                    </a>
-                  }
-                </div>
-              </div>
-            </section>
-          } @else if (hasIssueDetailsError()) {
-            <p class="text-sm text-rose-500">{{ issueDetailsError() }}</p>
-          } @else {
-            <p class="text-sm text-slate-500">Sin datos de issue.</p>
-          }
-        </nz-spin>
-      }
-
-      @if (activeIssueTab() === 'comments') {
-        <div class="mb-2 flex items-center justify-between">
-          <p class="m-0 text-[11px] font-extrabold uppercase tracking-[0.16em] text-slate-400">Comentarios</p>
-          <span class="text-xs text-slate-400">{{ issueComments().length }}</span>
+      <div class="terminal-card rounded-sm flex flex-col h-full kanban-col shadow-[0_0_15px_rgba(14,165,233,0.05)] border-[#0ea5e9]/30">
+        <div class="p-3 border-b border-[#0ea5e9]/20 flex items-center justify-between bg-[#0ea5e9]/5">
+          <div class="flex items-center gap-2">
+            <div class="w-2 h-2 rounded-full bg-[#0ea5e9] animate-pulse"></div>
+            <span class="text-xs font-bold text-[#0ea5e9] uppercase tracking-wider">In Progress</span>
+            <span class="ml-1 px-1.5 py-0.5 bg-[#0ea5e9]/10 text-[#0ea5e9] text-[10px] rounded border border-[#0ea5e9]/30">{{ inProgressTasks().length }}</span>
+          </div>
+          <button class="text-[#0ea5e9]/60 hover:text-[#0ea5e9]" type="button"><span class="material-symbols-outlined text-base">more_horiz</span></button>
         </div>
 
-        <nz-spin [nzSpinning]="issueCommentsLoading()">
-          @if (hasIssueCommentsError()) {
-            <p class="text-sm text-rose-500">{{ issueCommentsError() }}</p>
-          } @else if (issueComments().length === 0) {
-            <nz-empty nzNotFoundContent="Sin comentarios"></nz-empty>
-          } @else {
-            <div class="space-y-3">
-              @for (comment of issueComments(); track comment.id) {
-                <article class="rounded-xl border border-slate-200 bg-slate-50/80 p-3">
-                  <div class="mb-2 flex items-center justify-between gap-2">
-                    <div class="flex items-center gap-2">
-                      <nz-avatar
-                        [nzSrc]="comment.author?.avatarUrl ?? undefined"
-                        [nzText]="comment.author?.login?.[0] ?? '?'"
-                      ></nz-avatar>
-                      <strong class="text-sm text-slate-800">{{ comment.author?.login ?? 'unknown' }}</strong>
-                    </div>
-                    <span class="text-xs text-slate-400">{{ comment.createdAt | date: 'short' }}</span>
-                  </div>
+        <div class="p-3 flex-1 bg-black/20" cdkDropList [id]="inProgressListId" [cdkDropListConnectedTo]="connectedDropLists" [cdkDropListData]="inProgressTasks()" (cdkDropListDropped)="drop($event, 'InProgress')">
+          @if (inProgressTasks().length === 0) {
+            <div class="border-2 border-dashed border-slate-800 rounded-sm h-24 flex items-center justify-center text-slate-700 text-xs uppercase tracking-widest">Drop Here</div>
+          }
+          <div class="space-y-3">
+            @for (task of inProgressTasks(); track task.id) {
+              <div cdkDrag [cdkDragData]="task" class="kanban-drag-item">
+                <app-task-card [task]="task" [labels]="taskLabels(task.id)" (open)="openIssueDetails(task)"></app-task-card>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
 
-                  <p class="mb-0 whitespace-pre-wrap text-sm text-slate-700">{{ comment.body }}</p>
-                </article>
+      <div class="terminal-card rounded-sm flex flex-col h-full kanban-col">
+        <div class="p-3 border-b border-[#2dd4bf]/10 flex items-center justify-between bg-white/5">
+          <div class="flex items-center gap-2">
+            <div class="w-2 h-2 rounded-full bg-[#ccff00]"></div>
+            <span class="text-xs font-bold text-[#ccff00] uppercase tracking-wider">Done</span>
+            <span class="ml-1 px-1.5 py-0.5 bg-[#ccff00]/10 text-[#ccff00] text-[10px] rounded border border-[#ccff00]/30">{{ doneTasks().length }}</span>
+          </div>
+          <button class="text-slate-600 hover:text-white" type="button"><span class="material-symbols-outlined text-base">more_horiz</span></button>
+        </div>
+
+        <div class="p-3 flex-1 bg-black/20" cdkDropList [id]="doneListId" [cdkDropListConnectedTo]="connectedDropLists" [cdkDropListData]="doneTasks()" (cdkDropListDropped)="drop($event, 'Done')">
+          @if (doneTasks().length === 0) {
+            <div class="border-2 border-dashed border-slate-800 rounded-sm h-24 flex items-center justify-center text-slate-700 text-xs uppercase tracking-widest">Drop Here</div>
+          }
+          <div class="space-y-3">
+            @for (task of doneTasks(); track task.id) {
+              <div cdkDrag [cdkDragData]="task" class="kanban-drag-item">
+                <app-task-card [task]="task" [labels]="taskLabels(task.id)" (open)="openIssueDetails(task)"></app-task-card>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </nz-spin>
+
+  <nz-drawer [nzVisible]="issueDrawerOpen()" nzTitle="Issue Terminal" nzPlacement="right" [nzWidth]="540" [nzBodyStyle]="{ padding: '16px' }" (nzOnClose)="closeIssueDetails()">
+    <ng-container *nzDrawerContent>
+      @if (selectedTask()) {
+        <section class="issue-head">
+          <div>
+            @if (selectedTask()?.status === 'Todo') {
+              <span class="issue-state issue-state--todo">Todo</span>
+            }
+            @if (selectedTask()?.status === 'InProgress') {
+              <span class="issue-state issue-state--progress">In Progress</span>
+            }
+            @if (selectedTask()?.status === 'Done') {
+              <span class="issue-state issue-state--done">Done</span>
+            }
+          </div>
+
+          @if (issueDetails(); as details) {
+            <h3 class="issue-title">{{ details.title }}</h3>
+            <div class="issue-meta-line">
+              <span>#{{ details.issueNumber }}</span>
+              @if (details.url) {
+                <a [href]="details.url" target="_blank" rel="noopener" class="issue-link">Ver en GitHub</a>
               }
             </div>
+          } @else {
+            <h3 class="issue-title">{{ selectedTask()?.title }}</h3>
           }
-        </nz-spin>
+        </section>
+
+        <div class="issue-drawer-tabs">
+          <button class="issue-tab" [class.issue-tab--active]="activeIssueTab() === 'summary'" (click)="setIssueTab('summary')">Resumen</button>
+          <button class="issue-tab" [class.issue-tab--active]="activeIssueTab() === 'meta'" (click)="setIssueTab('meta')">Labels y Assignees</button>
+          <button class="issue-tab" [class.issue-tab--active]="activeIssueTab() === 'comments'" (click)="setIssueTab('comments')">Comentarios</button>
+        </div>
+
+        @if (activeIssueTab() === 'summary') {
+          <nz-spin [nzSpinning]="issueDetailsLoading()">
+            @if (issueDetails(); as details) {
+              <section class="issue-block">
+                <div class="issue-block-row">
+                  <p class="issue-block-title">Estado del issue</p>
+                  <nz-tag [nzColor]="details.state === 'open' ? 'blue' : 'green'">{{ details.state }}</nz-tag>
+                </div>
+                @if (hasIssueDescription()) {
+                  <p class="issue-body">{{ details.description }}</p>
+                } @else {
+                  <p class="issue-empty-text">Sin descripcion.</p>
+                }
+              </section>
+            } @else if (hasIssueDetailsError()) {
+              <p class="issue-error">{{ issueDetailsError() }}</p>
+            }
+          </nz-spin>
+        }
+
+        @if (activeIssueTab() === 'meta') {
+          <nz-spin [nzSpinning]="issueDetailsLoading()">
+            @if (issueDetails(); as details) {
+              <section class="issue-stack">
+                <div class="issue-block">
+                  <p class="issue-block-title">Labels</p>
+                  <div class="issue-chip-wrap">
+                    @if (details.labels.length === 0) {
+                      <span class="issue-empty-text">Sin labels</span>
+                    }
+                    @for (label of details.labels; track label.name) {
+                      <nz-tag [ngStyle]="issueLabelStyle(label.color)">{{ label.name }}</nz-tag>
+                    }
+                  </div>
+                </div>
+
+                <div class="issue-block">
+                  <p class="issue-block-title">Assignees</p>
+                  <div class="issue-assignees">
+                    @if (details.assignees.length === 0) {
+                      <span class="issue-empty-text">Sin assignees</span>
+                    }
+                    @for (assignee of details.assignees; track assignee.login) {
+                      <a [href]="assignee.profileUrl ?? null" target="_blank" rel="noopener">
+                        <nz-avatar [nzSrc]="assignee.avatarUrl ?? undefined" [nzText]="assignee.login[0]"></nz-avatar>
+                        <span>{{ assignee.login }}</span>
+                      </a>
+                    }
+                  </div>
+                </div>
+              </section>
+            }
+          </nz-spin>
+        }
+
+        @if (activeIssueTab() === 'comments') {
+          <div class="issue-comments-head">
+            <p>Comentarios</p>
+            <span>{{ issueComments().length }}</span>
+          </div>
+
+          <nz-spin [nzSpinning]="issueCommentsLoading()">
+            @if (hasIssueCommentsError()) {
+              <p class="issue-error">{{ issueCommentsError() }}</p>
+            } @else if (issueComments().length === 0) {
+              <nz-empty nzNotFoundContent="Sin comentarios"></nz-empty>
+            } @else {
+              <div class="issue-comments-list">
+                @for (comment of issueComments(); track comment.id) {
+                  <article class="issue-comment">
+                    <div class="issue-comment-head">
+                      <div>
+                        <nz-avatar [nzSrc]="comment.author?.avatarUrl ?? undefined" [nzText]="comment.author?.login?.[0] ?? '?'" />
+                        <strong>{{ comment.author?.login ?? 'unknown' }}</strong>
+                      </div>
+                      <span>{{ comment.createdAt | date: 'short' }}</span>
+                    </div>
+                    <p>{{ comment.body }}</p>
+                  </article>
+                }
+              </div>
+            }
+          </nz-spin>
+        }
       }
-    }
-  </ng-container>
-</nz-drawer>
+    </ng-container>
+  </nz-drawer>
+</div>

@@ -131,3 +131,7 @@ No guardar:
   - Se rediseno `register.page` con el estilo terminal solicitado manteniendo registro por email/password.
   - Se mantuvo separacion HTML/CSS y limpieza de imports no usados en el componente.
   - Se elimino el boton GitHub en registro para evitar redundancia UX (GitHub login queda centralizado en `login.page`).
+- 2026-02-24 - UI kanban terminal integral
+  - Se aplico tema terminal completo en `shell.page` y `kanban.page` (navbar, footer, paneles, columnas y formularios) alineado al diseno base.
+  - Se actualizaron `task-card` y drawer de issue para mantener coherencia visual con la nueva tematica.
+  - Se preservo toda la funcionalidad existente: NgRx, drag and drop, realtime SignalR, creacion de proyectos y creacion/movimiento de tareas.
