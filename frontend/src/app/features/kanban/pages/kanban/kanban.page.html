@@ -58,7 +58,6 @@
                 placeholder="Task name (e.g. Implement OIDC flow)..."
                 formControlName="title"
                 maxlength="120"
-                [disabled]="!selectedProjectId()"
               />
             </div>
 
@@ -68,12 +67,11 @@
               placeholder="Descripcion opcional para la issue"
               formControlName="description"
               maxlength="20000"
-              [disabled]="!selectedProjectId()"
             ></textarea>
           </div>
 
           <div class="lg:col-span-1 flex items-start">
-            <button class="btn-angled w-full h-10 flex items-center justify-center gap-2 bg-[#ccff00] hover:bg-[#b3e600] text-black font-bold text-xs uppercase tracking-widest transition-all shadow-[2px_2px_0px_rgba(255,255,255,0.1)] active:translate-y-0.5 active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed" [disabled]="!selectedProjectId()" type="submit">
+            <button class="btn-angled w-full h-10 flex items-center justify-center gap-2 bg-[#ccff00] hover:bg-[#b3e600] text-black font-bold text-xs uppercase tracking-widest transition-all shadow-[2px_2px_0px_rgba(255,255,255,0.1)] active:translate-y-0.5 active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed" [disabled]="taskForm.disabled || taskForm.invalid" type="submit">
               <span>Create</span>
               <span class="material-symbols-outlined text-sm font-bold">arrow_forward</span>
             </button>
