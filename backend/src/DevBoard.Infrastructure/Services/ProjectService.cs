@@ -45,6 +45,21 @@ public sealed class ProjectService(ApplicationDbContext dbContext, ITokenProtect
         return project is null ? null : Map(project);
     }
 
+    public async Task<bool> DeleteAsync(Guid ownerUserId, Guid projectId, CancellationToken cancellationToken = default)
+    {
+        var project = await dbContext.Projects
+            .FirstOrDefaultAsync(item => item.Id == projectId && item.OwnerUserId == ownerUserId, cancellationToken);
+
+        if (project is null)
+        {
+            return false;
+        }
+
+        dbContext.Projects.Remove(project);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return true;
+    }
+
     private static ProjectDto Map(Project project) =>
         new(project.Id, project.Name, project.RepoOwner, project.RepoName, project.CreatedAt);
 }

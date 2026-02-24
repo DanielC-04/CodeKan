@@ -135,3 +135,7 @@ No guardar:
   - Se aplico tema terminal completo en `shell.page` y `kanban.page` (navbar, footer, paneles, columnas y formularios) alineado al diseno base.
   - Se actualizaron `task-card` y drawer de issue para mantener coherencia visual con la nueva tematica.
   - Se preservo toda la funcionalidad existente: NgRx, drag and drop, realtime SignalR, creacion de proyectos y creacion/movimiento de tareas.
+- 2026-02-24 - Delete project flow
+  - Se agrego accion UI para eliminar proyecto activo desde el panel de proyecto.
+  - El store NgRx ahora soporta `deleteProject` con limpieza de estado/caches y seleccion automatica del siguiente proyecto disponible.
+  - Si no quedan proyectos, la seleccion activa pasa a `null` y el tablero queda vacio sin error.

@@ -91,6 +91,7 @@ Todos los endpoints devolveran `ApiResponse<T>`:
 - `POST /api/projects`
 - `GET /api/projects`
 - `GET /api/projects/{projectId}`
+- `DELETE /api/projects/{projectId}`
 - `PUT /api/projects/{projectId}`
 - `DELETE /api/projects/{projectId}`
 - `POST /api/projects/{projectId}/tasks`
@@ -246,6 +247,7 @@ dotnet test "backend/DevBoard.slnx"
 - Modelo de identidad externa implementado (`ExternalIdentity`) para vincular proveedores OAuth a usuarios internos y evitar duplicados.
 - Politica de vinculacion OAuth implementada en `AuthService`: prioridad por `ProviderUserId`, fallback por email verificado, y alta de usuario si no existe.
 - Flujo OAuth web expuesto en `AuthController` (`/api/auth/github/start` y `/api/auth/github/callback`) con validacion anti-CSRF por `state` en cookie temporal.
+- Eliminacion de proyectos implementada en `ProjectsController`/`ProjectService` con alcance local (BD) y sin operaciones sobre GitHub remoto.
 
 ## Bitacora de cambios
 - 2026-02-22 - Seccion 2 (backend ownership)
@@ -276,6 +278,10 @@ dotnet test "backend/DevBoard.slnx"
   - Se agrego endpoint `GET /api/auth/github/start` para iniciar OAuth y redirigir a GitHub.
   - Se agrego endpoint `GET /api/auth/github/callback` para validar `state`, completar login y redirigir al frontend.
   - Se agrego cookie temporal de `state` (`devboard_github_oauth_state`) para hardening CSRF del flujo OAuth.
+- 2026-02-24 - Seccion delete project
+  - Se agrego `DELETE /api/projects/{projectId}` con validacion por `ownerUserId`.
+  - `ProjectService` elimina proyecto y tareas relacionadas por cascada en BD.
+  - El borrado no ejecuta cambios en issues o repositorios de GitHub.
 
 ## Roadmap corto
 - Sprint 1: base arquitectura + dominio + EF Core + endpoints MVP.

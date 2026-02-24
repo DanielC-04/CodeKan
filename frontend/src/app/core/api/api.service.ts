@@ -20,4 +20,8 @@ export class ApiService {
   patch<T>(path: string, body: object, options?: object): Observable<ApiResponse<T>> {
     return this.http.patch<ApiResponse<T>>(`${this.apiUrl}${path}`, body, options);
   }
+
+  delete<T>(path: string, options?: object): Observable<T> {
+    return this.http.delete<T>(`${this.apiUrl}${path}`, options);
+  }
 }

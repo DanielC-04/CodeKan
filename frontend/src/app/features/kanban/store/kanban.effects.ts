@@ -14,6 +14,9 @@ import {
   createTask,
   createTaskFailure,
   createTaskSuccess,
+  deleteProject,
+  deleteProjectFailure,
+  deleteProjectSuccess,
   hydrateSelectedProject,
   loadProjects,
   loadProjectsFailure,
@@ -26,7 +29,7 @@ import {
   moveTaskSuccess,
   selectProject
 } from './kanban.actions';
-import { selectSelectedProjectId, selectTasks } from './kanban.selectors';
+import { selectProjects, selectSelectedProjectId, selectTasks } from './kanban.selectors';
 
 const ACTIVE_PROJECT_KEY_PREFIX = 'devboard.activeProjectId';
 const KANBAN_SNAPSHOT_KEY_PREFIX = 'devboard.kanban';
@@ -72,6 +75,36 @@ export class KanbanEffects {
     this.actions$.pipe(
       ofType(createProjectSuccess),
       map(({ project }) => selectProject({ projectId: project.id }))
+    )
+  );
+
+  readonly deleteProject$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(deleteProject),
+      switchMap(({ projectId }) =>
+        this.api.deleteProject(projectId).pipe(
+          map(() => deleteProjectSuccess({ projectId })),
+          catchError((error) =>
+            of(deleteProjectFailure({ error: error.error?.message ?? 'No se pudo eliminar el proyecto.' }))
+          )
+        )
+      )
+    )
+  );
+
+  readonly selectProjectAfterDelete$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(deleteProjectSuccess),
+      withLatestFrom(this.store.select(selectSelectedProjectId), this.store.select(selectProjects)),
+      map(([, selectedProjectId, projects]) => {
+        if (selectedProjectId) {
+          return null;
+        }
+
+        const nextProject = projects[0];
+        return nextProject ? selectProject({ projectId: nextProject.id }) : hydrateSelectedProject({ projectId: null });
+      }),
+      filter((action): action is ReturnType<typeof selectProject> | ReturnType<typeof hydrateSelectedProject> => action !== null)
     )
   );
 
@@ -183,6 +216,15 @@ export class KanbanEffects {
     { dispatch: false }
   );
 
+  readonly notifyProjectDeleteSuccess$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(deleteProjectSuccess),
+        tap(() => this.ui.showSuccess('Proyecto eliminado correctamente.'))
+      ),
+    { dispatch: false }
+  );
+
   readonly notifyCreateSuccess$ = createEffect(
     () =>
       this.actions$.pipe(
@@ -208,6 +250,30 @@ export class KanbanEffects {
           }
 
           this.localStore.set(snapshotKey, tasks);
+        })
+      ),
+    { dispatch: false }
+  );
+
+  readonly clearDeletedProjectCache$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(deleteProjectSuccess),
+        tap(({ projectId }) => {
+          const snapshotKey = this.getTaskSnapshotKey(projectId);
+          if (snapshotKey) {
+            this.localStore.remove(snapshotKey);
+          }
+
+          const activeProjectKey = this.getActiveProjectKey();
+          if (!activeProjectKey) {
+            return;
+          }
+
+          const persistedProject = this.localStore.get<string>(activeProjectKey);
+          if (persistedProject === projectId) {
+            this.localStore.remove(activeProjectKey);
+          }
         })
       ),
     { dispatch: false }

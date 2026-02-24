@@ -6,6 +6,9 @@ import {
   createTask,
   createTaskFailure,
   createTaskSuccess,
+  deleteProject,
+  deleteProjectFailure,
+  deleteProjectSuccess,
   hydrateSelectedProject,
   loadProjects,
   loadProjectsFailure,
@@ -32,6 +35,20 @@ export const kanbanReducer = createReducer(
     tasks: []
   })),
   on(createProjectFailure, (state, { error }) => ({ ...state, creatingProject: false, error })),
+  on(deleteProject, (state) => ({ ...state, loadingProjects: true, error: null })),
+  on(deleteProjectSuccess, (state, { projectId }) => {
+    const nextProjects = state.projects.filter((project) => project.id !== projectId);
+    const removedSelected = state.selectedProjectId === projectId;
+
+    return {
+      ...state,
+      loadingProjects: false,
+      projects: nextProjects,
+      selectedProjectId: removedSelected ? null : state.selectedProjectId,
+      tasks: removedSelected ? [] : state.tasks
+    };
+  }),
+  on(deleteProjectFailure, (state, { error }) => ({ ...state, loadingProjects: false, error })),
   on(loadProjects, (state) => ({ ...state, loadingProjects: true, error: null })),
   on(loadProjectsSuccess, (state, { projects }) => ({ ...state, loadingProjects: false, projects })),
   on(loadProjectsFailure, (state, { error }) => ({ ...state, loadingProjects: false, error })),

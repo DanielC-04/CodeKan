@@ -12,6 +12,7 @@ import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzTagModule } from 'ng-zorro-antd/tag';
+import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { finalize } from 'rxjs';
 import { SignalrService } from '../../../../core/signalr/signalr.service';
 import { UiService } from '../../../../core/ui/ui.service';
@@ -22,6 +23,7 @@ import { IssueComment, IssueDetails, IssueLabel, TaskDto, TaskStatus, TaskUpdate
 import {
   createProject,
   createTask,
+  deleteProject,
   loadProjects,
   moveTaskOptimistic,
   selectProject,
@@ -51,6 +53,7 @@ import {
     NzSelectModule,
     NzInputModule,
     NzSpinModule,
+    NzModalModule,
     NzEmptyModule,
     TaskCardComponent
   ],
@@ -63,6 +66,7 @@ export class KanbanPage implements OnInit, OnDestroy {
   private readonly fb = inject(FormBuilder);
   private readonly signalr = inject(SignalrService);
   private readonly ui = inject(UiService);
+  private readonly modal = inject(NzModalService);
   private readonly kanbanApi = inject(KanbanApiService);
   private readonly authSessionStore = inject(AuthSessionStore);
 
@@ -183,6 +187,22 @@ export class KanbanPage implements OnInit, OnDestroy {
 
     this.projectForm.reset();
     this.showProjectForm = false;
+  }
+
+  deleteSelectedProject(): void {
+    const projectId = this.selectedProjectId();
+    if (!projectId) {
+      return;
+    }
+
+    this.modal.confirm({
+      nzTitle: 'Eliminar proyecto',
+      nzContent: 'Se eliminara el proyecto y sus tareas locales. Esta accion no modifica GitHub.',
+      nzOkText: 'Eliminar',
+      nzOkDanger: true,
+      nzCancelText: 'Cancelar',
+      nzOnOk: () => this.store.dispatch(deleteProject({ projectId }))
+    });
   }
 
   submitTask(): void {
