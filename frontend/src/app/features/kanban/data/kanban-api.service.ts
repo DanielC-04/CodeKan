@@ -24,6 +24,10 @@ export class KanbanApiService {
     return this.api.post<ProjectDto>('/api/projects', request);
   }
 
+  deleteProject(projectId: string): Observable<void> {
+    return this.api.delete<void>(`/api/projects/${projectId}`);
+  }
+
   getTasks(projectId: string): Observable<ApiResponse<TaskDto[]>> {
     return this.api.get<TaskDto[]>(`/api/projects/${projectId}/tasks`);
   }

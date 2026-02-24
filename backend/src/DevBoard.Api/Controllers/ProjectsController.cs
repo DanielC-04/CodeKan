@@ -48,6 +48,21 @@ public sealed class ProjectsController(IProjectService projectService) : Control
         return Ok(ApiResponse<ProjectDto>.Ok(project, "Project fetched successfully."));
     }
 
+    [HttpDelete("{projectId:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Delete(Guid projectId, CancellationToken cancellationToken)
+    {
+        var ownerUserId = GetCurrentUserId();
+        var deleted = await projectService.DeleteAsync(ownerUserId, projectId, cancellationToken);
+        if (!deleted)
+        {
+            return NotFound(ApiResponse<object>.Fail("Project not found."));
+        }
+
+        return NoContent();
+    }
+
     private Guid GetCurrentUserId()
     {
         var value = User.FindFirstValue(ClaimTypes.NameIdentifier)

@@ -35,6 +35,11 @@
           <span class="material-symbols-outlined text-base">add</span>
           {{ showProjectForm ? 'Cancelar Proyecto' : 'Nuevo Proyecto' }}
         </button>
+
+        <button class="mt-2 w-full py-2 border border-dashed border-rose-900 text-rose-400 hover:border-rose-500 hover:text-rose-300 hover:bg-rose-500/10 transition-all text-xs uppercase tracking-widest flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed" type="button" (click)="deleteSelectedProject()" [disabled]="!selectedProjectId()">
+          <span class="material-symbols-outlined text-base">delete</span>
+          Eliminar Proyecto
+        </button>
       </div>
 
       <div class="md:col-span-8 terminal-card p-5 rounded-sm">

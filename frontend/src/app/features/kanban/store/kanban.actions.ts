@@ -24,6 +24,10 @@ export const createProjectFailure = createAction(
   props<{ error: string }>()
 );
 
+export const deleteProject = createAction('[Kanban] Delete Project', props<{ projectId: string }>());
+export const deleteProjectSuccess = createAction('[Kanban] Delete Project Success', props<{ projectId: string }>());
+export const deleteProjectFailure = createAction('[Kanban] Delete Project Failure', props<{ error: string }>());
+
 export const hydrateSelectedProject = createAction(
   '[Kanban] Hydrate Selected Project',
   props<{ projectId: string | null }>()
