@@ -130,19 +130,3 @@ npm run test -- --watch=false
 - Contexto backend: `backend/guia/CONTEXTO_PROYECTO.md`
 - Contexto frontend: `frontend/guia/CONTEXTO_FRONTEND.md`
 
-## Bitacora de cambios
-
-- 2026-02-22 (Seccion 1): se habilito instrumentacion de NgRx Store DevTools en frontend para inspeccionar acciones y estado durante desarrollo (`logOnly` en produccion).
-- 2026-02-22 (Seccion 2): se introdujo ownership de proyectos en backend (`Projects.OwnerUserId` + relacion con `Users`) y migracion EF para preparar aislamiento multiusuario.
-- 2026-02-22 (Seccion 3): se aplico aislamiento por usuario en endpoints/servicios de tareas; todas las operaciones de `Tasks` e issue details/comments ahora se filtran por `ownerUserId` del usuario autenticado.
-- 2026-02-22 (Seccion 4): se aislo cache local del frontend por usuario (`devboard.activeProjectId.<userId>` y `devboard.kanban.<userId>.<projectId>`) y se limpio cache de Kanban en logout/cambio de cuenta.
-- 2026-02-22 (Seccion 5): se agregaron pruebas de regresion para aislamiento multiusuario (API: acceso cruzado entre cuentas retorna `404`; frontend: limpieza de cache al cambiar de usuario).
-- 2026-02-22 (Seccion A): se agrego configuracion base de GitHub OAuth en backend (`GitHubOAuthOptions` + `IGitHubOAuthClient`) para construir authorize URL e intercambiar `code` por identidad GitHub verificada.
-- 2026-02-23 (Seccion B): se agrego el modelo `ExternalIdentity` (GitHub y futuros proveedores) con migracion EF y relacion a `Users`, incluyendo indice unico por (`Provider`, `ProviderUserId`) para prevenir cuentas duplicadas.
-- 2026-02-23 (Seccion C): `AuthService` incorporo politica de vinculacion GitHub (`providerUserId -> email verificado -> alta`) y nuevo contrato `LoginWithGitHubAsync`, manteniendo emision de JWT y refresh cookie igual al login actual.
-- 2026-02-23 (Seccion D): se habilito flujo web OAuth en `AuthController` con `GET /api/auth/github/start` y `GET /api/auth/github/callback`, validacion de `state` via cookie temporal y redireccion segura a frontend success/error.
-- 2026-02-23 (Seccion E): frontend incorpora boton "Continuar con GitHub" en login y nueva ruta `auth/github/callback` que finaliza sesion via `refresh()` y redirige al Kanban.
-- 2026-02-23 (UI Login): se aplico nuevo diseno visual tipo terminal en la pagina de login manteniendo funcionalidad existente (email/password, GitHub OAuth, error OAuth y acceso a registro).
-- 2026-02-23 (UI Register): se aplico diseno terminal en la pagina de registro manteniendo flujo funcional de alta por email/password; por decision UX se retiro el boton GitHub de registro y se concentro en login.
-- 2026-02-24 (UI Kanban Terminal): se aplico tema terminal integral al area autenticada (shell, tablero Kanban, tarjetas y drawer de issue) siguiendo `.diseño.txt`, preservando la logica existente de NgRx, drag-and-drop, SignalR y flujos de proyecto/tareas.
-- 2026-02-24 (Delete Project): se agrego eliminacion de proyectos en backend y frontend (BD + estado local), con seleccion automatica del siguiente proyecto disponible y sin acciones destructivas sobre issues/repositorios en GitHub.
