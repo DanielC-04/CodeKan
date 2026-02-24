@@ -140,6 +140,16 @@ export class KanbanPage implements OnInit, OnDestroy {
     }
   });
 
+  private readonly syncTaskFormStateEffect = effect(() => {
+    const hasSelectedProject = !!this.selectedProjectId();
+    if (hasSelectedProject) {
+      this.taskForm.enable({ emitEvent: false });
+      return;
+    }
+
+    this.taskForm.disable({ emitEvent: false });
+  });
+
   ngOnInit(): void {
     this.store.dispatch(loadProjects());
 

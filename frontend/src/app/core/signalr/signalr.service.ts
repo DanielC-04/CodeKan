@@ -18,6 +18,7 @@ export class SignalrService {
       .withUrl(`${environment.apiUrl}/hubs/devboard`, {
         accessTokenFactory: () => token
       })
+      .configureLogging(signalR.LogLevel.Warning)
       .withAutomaticReconnect()
       .build();
 
