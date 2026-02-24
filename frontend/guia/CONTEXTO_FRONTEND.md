@@ -127,3 +127,7 @@ No guardar:
   - Se rediseno `login.page` para replicar el estilo terminal entregado en diseno sin alterar el flujo de autenticacion.
   - Se mantuvo separacion clara entre estructura (`login.page.html`) y estilos (`login.page.css`) con enfoque Tailwind + CSS de componente.
   - Se agrego fuente `Space Mono` en `index.html` para consistencia visual del login.
+- 2026-02-23 - UI register terminal
+  - Se rediseno `register.page` con el estilo terminal solicitado manteniendo registro por email/password.
+  - Se mantuvo separacion HTML/CSS y limpieza de imports no usados en el componente.
+  - Se elimino el boton GitHub en registro para evitar redundancia UX (GitHub login queda centralizado en `login.page`).
