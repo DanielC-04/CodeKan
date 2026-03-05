@@ -18,6 +18,9 @@ import {
   deleteProjectFailure,
   deleteProjectSuccess,
   hydrateSelectedProject,
+  importIssues,
+  importIssuesFailure,
+  importIssuesSuccess,
   loadProjects,
   loadProjectsFailure,
   loadProjectsSuccess,
@@ -186,6 +189,22 @@ export class KanbanEffects {
     )
   );
 
+  readonly importIssues$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(importIssues),
+      withLatestFrom(this.store.select(selectSelectedProjectId)),
+      filter(([, projectId]) => !!projectId),
+      switchMap(([, projectId]) =>
+        this.api.importIssues(projectId!).pipe(
+          map((response) => importIssuesSuccess({ result: response.data })),
+          catchError((error) =>
+            of(importIssuesFailure({ error: error.error?.message ?? 'No se pudieron importar issues.' }))
+          )
+        )
+      )
+    )
+  );
+
   readonly moveTask$ = createEffect(() =>
     this.actions$.pipe(
       ofType(moveTaskOptimistic),
@@ -234,10 +253,39 @@ export class KanbanEffects {
     { dispatch: false }
   );
 
+  readonly notifyImportSuccess$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(importIssuesSuccess),
+        tap(({ result }) =>
+          this.ui.showSuccess(`Importados ${result.imported} de ${result.total} issues. (${result.skipped} omitidos)`)
+        )
+      ),
+    { dispatch: false }
+  );
+
+  readonly notifyImportFailure$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(importIssuesFailure),
+        tap(({ error }) => this.ui.showError(error))
+      ),
+    { dispatch: false }
+  );
+
+  readonly reloadTasksAfterImport$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(importIssuesSuccess),
+      withLatestFrom(this.store.select(selectSelectedProjectId)),
+      filter(([, projectId]) => !!projectId),
+      map(([, projectId]) => loadTasks({ projectId: projectId! }))
+    )
+  );
+
   readonly persistTasksSnapshot$ = createEffect(
     () =>
       this.actions$.pipe(
-        ofType(loadTasksSuccess, createTaskSuccess, moveTaskSuccess),
+        ofType(loadTasksSuccess, createTaskSuccess, moveTaskSuccess, importIssuesSuccess),
         withLatestFrom(this.store.select(selectSelectedProjectId), this.store.select(selectTasks)),
         tap(([, projectId, tasks]) => {
           if (!projectId) {

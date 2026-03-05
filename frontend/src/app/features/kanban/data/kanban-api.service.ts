@@ -7,6 +7,7 @@ import {
   CreateTaskRequest,
   IssueComment,
   IssueDetails,
+  ImportIssuesResult,
   ProjectDto,
   TaskDto,
   TaskStatus
@@ -46,5 +47,9 @@ export class KanbanApiService {
 
   getIssueComments(taskId: string): Observable<ApiResponse<IssueComment[]>> {
     return this.api.get<IssueComment[]>(`/api/tasks/${taskId}/issue-comments`);
+  }
+
+  importIssues(projectId: string): Observable<ApiResponse<ImportIssuesResult>> {
+    return this.api.post<ImportIssuesResult>(`/api/projects/${projectId}/import-issues`, {});
   }
 }

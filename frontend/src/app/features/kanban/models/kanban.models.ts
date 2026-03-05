@@ -73,3 +73,9 @@ export interface TaskUpdatedEvent {
   completedAt: string | null;
   updatedFrom: string;
 }
+
+export interface ImportIssuesResult {
+  total: number;
+  imported: number;
+  skipped: number;
+}

@@ -39,4 +39,11 @@ public interface IGitHubIssueService
         int issueNumber,
         string token,
         CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<GitHubIssueDetailsDto>> ListIssuesAsync(
+        string repoOwner,
+        string repoName,
+        int maxIssues,
+        string token,
+        CancellationToken cancellationToken = default);
 }

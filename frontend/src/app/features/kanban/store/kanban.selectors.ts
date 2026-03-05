@@ -22,6 +22,11 @@ export const selectDoneTasks = createSelector(selectTasks, (tasks) =>
 
 export const selectKanbanLoading = createSelector(
   selectKanbanState,
-  (state) => state.loadingProjects || state.creatingProject || state.loadingTasks || state.creatingTask
+  (state) =>
+    state.loadingProjects ||
+    state.creatingProject ||
+    state.loadingTasks ||
+    state.creatingTask ||
+    state.importingIssues
 );
 export const selectKanbanError = createSelector(selectKanbanState, (state) => state.error);

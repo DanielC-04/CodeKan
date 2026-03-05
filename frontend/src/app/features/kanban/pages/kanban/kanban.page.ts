@@ -24,6 +24,7 @@ import {
   createProject,
   createTask,
   deleteProject,
+  importIssues,
   loadProjects,
   moveTaskOptimistic,
   selectProject,
@@ -212,6 +213,21 @@ export class KanbanPage implements OnInit, OnDestroy {
       nzOkDanger: true,
       nzCancelText: 'Cancelar',
       nzOnOk: () => this.store.dispatch(deleteProject({ projectId }))
+    });
+  }
+
+  importIssuesFromGitHub(): void {
+    const projectId = this.selectedProjectId();
+    if (!projectId) {
+      return;
+    }
+
+    this.modal.confirm({
+      nzTitle: 'Importar issues',
+      nzContent: 'Se importaran hasta 100 issues desde GitHub. Issues ya importadas se omitiran.',
+      nzOkText: 'Importar',
+      nzCancelText: 'Cancelar',
+      nzOnOk: () => this.store.dispatch(importIssues())
     });
   }
 

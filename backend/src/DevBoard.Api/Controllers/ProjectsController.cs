@@ -63,6 +63,24 @@ public sealed class ProjectsController(IProjectService projectService) : Control
         return NoContent();
     }
 
+    [HttpPost("{projectId:guid}/import-issues")]
+    [ProducesResponseType(typeof(ApiResponse<ImportIssuesResult>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ApiResponse<ImportIssuesResult>>> ImportIssues(Guid projectId, CancellationToken cancellationToken)
+    {
+        var ownerUserId = GetCurrentUserId();
+
+        try
+        {
+            var result = await projectService.ImportIssuesAsync(ownerUserId, projectId, 100, cancellationToken);
+            return Ok(ApiResponse<ImportIssuesResult>.Ok(result, "Issues imported successfully."));
+        }
+        catch (InvalidOperationException)
+        {
+            return NotFound(ApiResponse<object>.Fail("Project not found."));
+        }
+    }
+
     private Guid GetCurrentUserId()
     {
         var value = User.FindFirstValue(ClaimTypes.NameIdentifier)
