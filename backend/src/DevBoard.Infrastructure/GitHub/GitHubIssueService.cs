@@ -198,6 +198,72 @@ public sealed class GitHubIssueService : IGitHubIssueService
         }
     }
 
+    public async Task<IReadOnlyList<GitHubIssueDetailsDto>> ListIssuesAsync(
+        string repoOwner,
+        string repoName,
+        int maxIssues,
+        string token,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        try
+        {
+            var client = CreateClient(token);
+            var request = new RepositoryIssueRequest
+            {
+                State = ItemStateFilter.All,
+                Filter = IssueFilter.All,
+                SortProperty = IssueSort.Created,
+                SortDirection = SortDirection.Descending
+            };
+            var apiOptions = new ApiOptions
+            {
+                PageCount = 1,
+                PageSize = Math.Clamp(maxIssues, 1, 100),
+                StartPage = 1
+            };
+
+            var issues = await client.Issue.GetAllForRepository(repoOwner, repoName, request, apiOptions);
+            var filtered = issues.Where(issue => issue.PullRequest is null).Take(maxIssues).ToList();
+
+            return filtered
+                .Select(issue => new GitHubIssueDetailsDto(
+                    Guid.Empty,
+                    issue.Number,
+                    issue.Title,
+                    issue.Body,
+                    issue.State.StringValue,
+                    issue.StateReason?.StringValue,
+                    MapUser(issue.User),
+                    issue.Assignees
+                        .Select(MapUser)
+                        .Where(item => item is not null)
+                        .Cast<GitHubIssueUserDto>()
+                        .ToList(),
+                    issue.Labels
+                        .Select(label => new GitHubIssueLabelDto(label.Name, label.Color))
+                        .ToList(),
+                    issue.Comments,
+                    issue.CreatedAt,
+                    issue.UpdatedAt ?? issue.CreatedAt,
+                    issue.HtmlUrl))
+                .ToList();
+        }
+        catch (AuthorizationException exception)
+        {
+            throw new GitHubIntegrationException("GitHub authorization failed. Verify token permissions.", exception);
+        }
+        catch (NotFoundException exception)
+        {
+            throw new GitHubIntegrationException("GitHub repository was not found.", exception);
+        }
+        catch (ApiException exception)
+        {
+            throw new GitHubIntegrationException($"GitHub API error while listing issues: {exception.Message}", exception);
+        }
+    }
+
     private static GitHubIssueUserDto? MapUser(User? user)
     {
         if (user is null)

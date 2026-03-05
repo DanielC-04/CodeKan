@@ -106,6 +106,7 @@ No guardar:
 - Panel de issue con tabs y cache por tarea para mejorar rendimiento al reabrir.
 - Cobertura de pruebas frontend extendida para Kanban y tarjetas.
 - Instrumentacion de NgRx Store DevTools activa para debugging en desarrollo (`logOnly` cuando `production=true`).
+- Importacion manual de issues GitHub desde la UI Kanban (hasta 100, re-ejecutable).
 
 ## Bitacora de cambios
 
@@ -139,3 +140,7 @@ No guardar:
   - Se agrego accion UI para eliminar proyecto activo desde el panel de proyecto.
   - El store NgRx ahora soporta `deleteProject` con limpieza de estado/caches y seleccion automatica del siguiente proyecto disponible.
   - Si no quedan proyectos, la seleccion activa pasa a `null` y el tablero queda vacio sin error.
+- 2026-03-05 - Import issues manual
+  - Se agrego boton "Importar Issues" en Kanban y confirmacion modal.
+  - NgRx incorpora flujo `importIssues` con reload de tareas y mensaje de resultado.
+  - API frontend agrega `POST /api/projects/{projectId}/import-issues`.

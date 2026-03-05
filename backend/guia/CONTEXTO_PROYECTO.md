@@ -96,6 +96,7 @@ Todos los endpoints devolveran `ApiResponse<T>`:
 - `DELETE /api/projects/{projectId}`
 - `POST /api/projects/{projectId}/tasks`
 - `GET /api/projects/{projectId}/tasks`
+- `POST /api/projects/{projectId}/import-issues`
 - `GET /api/tasks/{taskId}`
 - `PATCH /api/tasks/{taskId}/status`
 - `GET /api/tasks/{taskId}/issue-details`
@@ -114,9 +115,10 @@ Todos los endpoints devolveran `ApiResponse<T>`:
 4. Usuario mueve Task de columna en Kanban.
 5. Si Task llega a Done, backend cierra el Issue en GitHub.
 6. Si Task vuelve de `Done` a `InProgress`, backend reabre el Issue en GitHub.
-6. GitHub envia webhooks por cambios externos (ej. issue cerrada manualmente en GitHub).
-7. Backend parsea webhook, actualiza Task local y emite `TaskUpdated` por SignalR.
-8. Frontend escucha `TaskUpdated`, despacha accion NgRx y actualiza UI al instante.
+7. GitHub envia webhooks por cambios externos (ej. issue cerrada manualmente en GitHub).
+8. Backend parsea webhook, actualiza Task local y emite `TaskUpdated` por SignalR.
+9. Frontend escucha `TaskUpdated`, despacha accion NgRx y actualiza UI al instante.
+10. El usuario puede importar issues existentes de GitHub manualmente (hasta 100, sin editar GitHub).
 
 ## Flujo de usuario en DevBoard (simple)
 - El usuario crea un `Project` dentro de DevBoard para un desarrollo concreto.
@@ -282,6 +284,10 @@ dotnet test "backend/DevBoard.slnx"
   - Se agrego `DELETE /api/projects/{projectId}` con validacion por `ownerUserId`.
   - `ProjectService` elimina proyecto y tareas relacionadas por cascada en BD.
   - El borrado no ejecuta cambios en issues o repositorios de GitHub.
+- 2026-03-05 - Seccion import issues manual
+  - Se agrego `POST /api/projects/{projectId}/import-issues` para traer issues existentes del repo.
+  - Importacion read-only con maximo 100 issues y mapeo `open` -> `Todo`, `closed` -> `Done`.
+  - Se omiten issues ya importadas por `GitHubIssueNumber`.
 
 ## Roadmap corto
 - Sprint 1: base arquitectura + dominio + EF Core + endpoints MVP.

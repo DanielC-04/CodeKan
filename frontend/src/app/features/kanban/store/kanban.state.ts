@@ -8,6 +8,7 @@ export interface KanbanState {
   creatingProject: boolean;
   loadingTasks: boolean;
   creatingTask: boolean;
+  importingIssues: boolean;
   error: string | null;
 }
 
@@ -19,5 +20,6 @@ export const initialKanbanState: KanbanState = {
   creatingProject: false,
   loadingTasks: false,
   creatingTask: false,
+  importingIssues: false,
   error: null
 };

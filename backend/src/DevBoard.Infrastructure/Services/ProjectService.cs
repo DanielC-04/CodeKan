@@ -1,13 +1,18 @@
 using DevBoard.Application.Common.Interfaces;
 using DevBoard.Application.Projects.Dtos;
 using DevBoard.Application.Projects.Services;
+using DevBoard.Application.Tasks.Services;
 using DevBoard.Domain.Entities;
+using DomainTaskStatus = DevBoard.Domain.Enums.TaskStatus;
 using DevBoard.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace DevBoard.Infrastructure.Services;
 
-public sealed class ProjectService(ApplicationDbContext dbContext, ITokenProtector tokenProtector) : IProjectService
+public sealed class ProjectService(
+    ApplicationDbContext dbContext,
+    ITokenProtector tokenProtector,
+    IGitHubIssueService gitHubIssueService) : IProjectService
 {
     public async Task<ProjectDto> CreateAsync(Guid ownerUserId, CreateProjectRequest request, CancellationToken cancellationToken = default)
     {
@@ -58,6 +63,67 @@ public sealed class ProjectService(ApplicationDbContext dbContext, ITokenProtect
         dbContext.Projects.Remove(project);
         await dbContext.SaveChangesAsync(cancellationToken);
         return true;
+    }
+
+    public async Task<ImportIssuesResult> ImportIssuesAsync(
+        Guid ownerUserId,
+        Guid projectId,
+        int maxIssues = 100,
+        CancellationToken cancellationToken = default)
+    {
+        var project = await dbContext.Projects
+            .AsNoTracking()
+            .FirstOrDefaultAsync(item => item.Id == projectId && item.OwnerUserId == ownerUserId, cancellationToken);
+
+        if (project is null)
+        {
+            throw new InvalidOperationException("Project not found.");
+        }
+
+        var token = tokenProtector.Unprotect(project.GitHubTokenEncrypted);
+        var issues = await gitHubIssueService.ListIssuesAsync(project.RepoOwner, project.RepoName, maxIssues, token, cancellationToken);
+
+        var issueNumbers = issues.Select(issue => issue.IssueNumber).ToList();
+        var existing = await dbContext.Tasks
+            .AsNoTracking()
+            .Where(task => task.ProjectId == projectId && task.GitHubIssueNumber.HasValue && issueNumbers.Contains(task.GitHubIssueNumber.Value))
+            .Select(task => task.GitHubIssueNumber!.Value)
+            .ToListAsync(cancellationToken);
+
+        var existingSet = existing.ToHashSet();
+        var imported = 0;
+        var skipped = 0;
+
+        foreach (var issue in issues)
+        {
+            if (existingSet.Contains(issue.IssueNumber))
+            {
+                skipped++;
+                continue;
+            }
+
+            var status = issue.State.Equals("closed", StringComparison.OrdinalIgnoreCase)
+                ? DomainTaskStatus.Done
+                : DomainTaskStatus.Todo;
+
+            var task = new DevBoard.Domain.Entities.Task(projectId, issue.Title, issue.CreatedAt.UtcDateTime);
+            task.SetGitHubIssueNumber(issue.IssueNumber);
+
+            if (status == DomainTaskStatus.Done)
+            {
+                task.ApplyGitHubStatus(DomainTaskStatus.Done, issue.UpdatedAt.UtcDateTime);
+            }
+
+            dbContext.Tasks.Add(task);
+            imported++;
+        }
+
+        if (imported > 0)
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+
+        return new ImportIssuesResult(issues.Count, imported, skipped);
     }
 
     private static ProjectDto Map(Project project) =>

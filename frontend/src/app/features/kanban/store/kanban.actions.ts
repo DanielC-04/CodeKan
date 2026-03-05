@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { ProjectDto, TaskDto, TaskStatus, TaskUpdatedEvent } from '../models/kanban.models';
+import { ImportIssuesResult, ProjectDto, TaskDto, TaskStatus, TaskUpdatedEvent } from '../models/kanban.models';
 
 export const loadProjects = createAction('[Kanban] Load Projects');
 export const loadProjectsSuccess = createAction(
@@ -59,4 +59,14 @@ export const moveTaskFailure = createAction(
 export const taskUpdatedFromRealtime = createAction(
   '[Kanban] Task Updated From Realtime',
   props<{ event: TaskUpdatedEvent }>()
+);
+
+export const importIssues = createAction('[Kanban] Import Issues');
+export const importIssuesSuccess = createAction(
+  '[Kanban] Import Issues Success',
+  props<{ result: ImportIssuesResult }>()
+);
+export const importIssuesFailure = createAction(
+  '[Kanban] Import Issues Failure',
+  props<{ error: string }>()
 );

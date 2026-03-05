@@ -40,6 +40,11 @@
           <span class="material-symbols-outlined text-base">delete</span>
           Eliminar Proyecto
         </button>
+
+        <button class="mt-2 w-full py-2 border border-dashed border-[#2dd4bf]/40 text-[#2dd4bf] hover:border-[#2dd4bf] hover:text-[#ccff00] hover:bg-[#2dd4bf]/10 transition-all text-xs uppercase tracking-widest flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed" type="button" (click)="importIssuesFromGitHub()" [disabled]="!selectedProjectId()">
+          <span class="material-symbols-outlined text-base">download</span>
+          Importar Issues
+        </button>
       </div>
 
       <div class="md:col-span-8 terminal-card p-5 rounded-sm">

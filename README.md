@@ -17,6 +17,7 @@ CodeKan es una aplicacion Kanban con sincronizacion bidireccional con GitHub Iss
 - Webhook de GitHub para sincronizacion de cambios externos.
 - Vista de detalle de issue (descripcion, labels, assignees, comentarios read-only).
 - Cache de detalles por tarea para mejor rendimiento.
+- Importacion manual de issues GitHub en un proyecto (hasta 100, re-ejecutable).
 
 ## Estructura del proyecto
 
@@ -118,6 +119,7 @@ npm run test -- --watch=false
    - `Done -> InProgress` -> reabre issue
 4. Cambios hechos en GitHub (close/reopen/edit) llegan por webhook y actualizan DevBoard.
 5. SignalR notifica a clientes en tiempo real.
+6. (Opcional) El usuario puede importar issues existentes del repo manualmente.
 
 ## Seguridad
 
