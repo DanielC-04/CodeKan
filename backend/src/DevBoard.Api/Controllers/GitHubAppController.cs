@@ -1,5 +1,6 @@
 using DevBoard.Application.Common;
 using DevBoard.Application.Common.Interfaces;
+using DevBoard.Application.Projects.Dtos;
 using DevBoard.Domain.Entities;
 using DevBoard.Infrastructure.GitHub;
 using DevBoard.Infrastructure.Persistence;
@@ -20,6 +21,7 @@ namespace DevBoard.Api.Controllers;
 public sealed class GitHubAppController(
     ApplicationDbContext dbContext,
     IGitHubAppTokenService gitHubAppTokenService,
+    IGitHubAppInstallationService gitHubAppInstallationService,
     IConfiguration configuration,
     IOptions<GitHubAppOptions> options) : ControllerBase
 {
@@ -64,6 +66,39 @@ public sealed class GitHubAppController(
 
         var installUrl = _options.InstallUrl.TrimEnd('/') + "?state=" + Uri.EscapeDataString(state);
         return Ok(ApiResponse<GitHubAppInstallUrlResponse>.Ok(new GitHubAppInstallUrlResponse(installUrl), "Install URL created."));
+    }
+
+    [HttpPost("link-existing")]
+    [ProducesResponseType(typeof(ApiResponse<ProjectDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<ApiResponse<ProjectDto>>> LinkExistingInstallation(
+        [FromBody] GitHubAppInstallUrlRequest request,
+        CancellationToken cancellationToken)
+    {
+        var ownerUserId = GetCurrentUserId();
+        var project = await dbContext.Projects
+            .FirstOrDefaultAsync(item => item.Id == request.ProjectId && item.OwnerUserId == ownerUserId, cancellationToken);
+
+        if (project is null)
+        {
+            return BadRequest(ApiResponse<object>.Fail("Project not found."));
+        }
+
+        var installationId = await gitHubAppInstallationService.GetInstallationIdForRepoAsync(
+            project.RepoOwner,
+            project.RepoName,
+            cancellationToken);
+
+        if (!installationId.HasValue)
+        {
+            return BadRequest(ApiResponse<object>.Fail("La GitHub App no esta instalada en este repositorio."));
+        }
+
+        project.SetGitHubInstallation(installationId.Value);
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        var dto = new ProjectDto(project.Id, project.Name, project.RepoOwner, project.RepoName, project.CreatedAt, true);
+        return Ok(ApiResponse<ProjectDto>.Ok(dto, "GitHub App vinculada correctamente."));
     }
 
     [HttpGet("callback")]

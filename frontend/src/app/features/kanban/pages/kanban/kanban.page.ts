@@ -262,6 +262,31 @@ export class KanbanPage implements OnInit, OnDestroy {
     });
   }
 
+  linkExistingGitHubApp(): void {
+    const projectId = this.selectedProjectId();
+    if (!projectId) {
+      return;
+    }
+
+    this.modal.confirm({
+      nzTitle: 'Vincular instalacion existente',
+      nzContent: 'Si la GitHub App ya esta instalada en el repositorio, se asociara al proyecto actual.',
+      nzOkText: 'Vincular',
+      nzCancelText: 'Cancelar',
+      nzOnOk: () => {
+        this.kanbanApi.linkGitHubInstallation(projectId).subscribe({
+          next: () => {
+            this.ui.showSuccess('GitHub App vinculada correctamente.');
+            this.store.dispatch(loadProjects());
+          },
+          error: (error) => {
+            this.ui.showError(error.error?.message ?? 'No se pudo vincular la GitHub App.');
+          }
+        });
+      }
+    });
+  }
+
   submitTask(): void {
     if (this.taskForm.invalid) {
       this.taskForm.markAllAsTouched();

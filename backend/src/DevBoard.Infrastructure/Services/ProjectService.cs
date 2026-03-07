@@ -12,7 +12,8 @@ namespace DevBoard.Infrastructure.Services;
 public sealed class ProjectService(
     ApplicationDbContext dbContext,
     IGitHubIssueService gitHubIssueService,
-    IGitHubAppTokenService gitHubAppTokenService) : IProjectService
+    IGitHubAppTokenService gitHubAppTokenService,
+    IGitHubAppInstallationService gitHubAppInstallationService) : IProjectService
 {
     public async Task<ProjectDto> CreateAsync(Guid ownerUserId, CreateProjectRequest request, CancellationToken cancellationToken = default)
     {
@@ -25,6 +26,17 @@ public sealed class ProjectService(
 
         dbContext.Projects.Add(project);
         await dbContext.SaveChangesAsync(cancellationToken);
+
+        var installationId = await gitHubAppInstallationService.GetInstallationIdForRepoAsync(
+            project.RepoOwner,
+            project.RepoName,
+            cancellationToken);
+
+        if (installationId.HasValue)
+        {
+            project.SetGitHubInstallation(installationId.Value);
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
 
         return Map(project);
     }

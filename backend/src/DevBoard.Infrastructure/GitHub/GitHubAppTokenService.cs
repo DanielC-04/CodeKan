@@ -16,17 +16,7 @@ public sealed class GitHubAppTokenService(IOptions<GitHubAppOptions> options) : 
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        if (string.IsNullOrWhiteSpace(_options.AppId))
-        {
-            throw new InvalidOperationException("GitHub AppId is missing.");
-        }
-
-        if (string.IsNullOrWhiteSpace(_options.PrivateKey))
-        {
-            throw new InvalidOperationException("GitHub App private key is missing.");
-        }
-
-        var jwt = CreateJwt(_options.AppId, _options.PrivateKey);
+        var jwt = await GetAppJwtAsync(cancellationToken);
         var client = new GitHubClient(new ProductHeaderValue("DevBoard"))
         {
             Credentials = new Credentials(jwt, AuthenticationType.Bearer)
@@ -39,6 +29,24 @@ public sealed class GitHubAppTokenService(IOptions<GitHubAppOptions> options) : 
         }
 
         return response.Token;
+    }
+
+    public Task<string> GetAppJwtAsync(CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (string.IsNullOrWhiteSpace(_options.AppId))
+        {
+            throw new InvalidOperationException("GitHub AppId is missing.");
+        }
+
+        if (string.IsNullOrWhiteSpace(_options.PrivateKey))
+        {
+            throw new InvalidOperationException("GitHub App private key is missing.");
+        }
+
+        var jwt = CreateJwt(_options.AppId, _options.PrivateKey);
+        return Task.FromResult(jwt);
     }
 
     private static string CreateJwt(string appId, string privateKey)
