@@ -12,6 +12,7 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     public DbSet<Project> Projects => Set<Project>();
     public DbSet<TaskEntity> Tasks => Set<TaskEntity>();
     public DbSet<WebhookDelivery> WebhookDeliveries => Set<WebhookDelivery>();
+    public DbSet<GitHubInstallationNonce> GitHubInstallationNonces => Set<GitHubInstallationNonce>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

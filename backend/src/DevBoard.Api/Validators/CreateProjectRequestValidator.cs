@@ -19,8 +19,5 @@ public sealed class CreateProjectRequestValidator : AbstractValidator<CreateProj
             .NotEmpty()
             .MaximumLength(100);
 
-        RuleFor(request => request.GitHubToken)
-            .NotEmpty()
-            .MaximumLength(4000);
     }
 }

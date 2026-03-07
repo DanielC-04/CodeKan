@@ -25,6 +25,10 @@ export class KanbanApiService {
     return this.api.post<ProjectDto>('/api/projects', request);
   }
 
+  getGitHubInstallUrl(projectId: string): Observable<ApiResponse<{ installUrl: string }>> {
+    return this.api.post<{ installUrl: string }>('/api/github-app/install-url', { projectId });
+  }
+
   deleteProject(projectId: string): Observable<void> {
     return this.api.delete<void>(`/api/projects/${projectId}`);
   }

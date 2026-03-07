@@ -66,9 +66,15 @@ public sealed class ProjectsController(IProjectService projectService) : Control
     [HttpPost("{projectId:guid}/import-issues")]
     [ProducesResponseType(typeof(ApiResponse<ImportIssuesResult>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<ApiResponse<ImportIssuesResult>>> ImportIssues(Guid projectId, CancellationToken cancellationToken)
     {
         var ownerUserId = GetCurrentUserId();
+
+        if (!await projectService.IsGitHubInstallationConfiguredAsync(ownerUserId, projectId, cancellationToken))
+        {
+            return BadRequest(ApiResponse<object>.Fail("GitHub App no configurada para este proyecto."));
+        }
 
         try
         {

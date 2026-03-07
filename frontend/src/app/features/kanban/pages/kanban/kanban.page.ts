@@ -1,6 +1,7 @@
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, effect, inject, signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { NzAvatarModule } from 'ng-zorro-antd/avatar';
@@ -70,9 +71,14 @@ export class KanbanPage implements OnInit, OnDestroy {
   private readonly modal = inject(NzModalService);
   private readonly kanbanApi = inject(KanbanApiService);
   private readonly authSessionStore = inject(AuthSessionStore);
+  private readonly route = inject(ActivatedRoute);
 
   readonly projects = this.store.selectSignal(selectProjects);
   readonly selectedProjectId = this.store.selectSignal(selectSelectedProjectId);
+  readonly selectedProject = computed(() => {
+    const projectId = this.selectedProjectId();
+    return projectId ? this.projects().find((project) => project.id === projectId) ?? null : null;
+  });
   readonly todoTasks = this.store.selectSignal(selectTodoTasks);
   readonly inProgressTasks = this.store.selectSignal(selectInProgressTasks);
   readonly doneTasks = this.store.selectSignal(selectDoneTasks);
@@ -96,6 +102,7 @@ export class KanbanPage implements OnInit, OnDestroy {
   readonly taskLabelsById = signal<Record<string, IssueLabel[]>>({});
   readonly issueDetailsCacheByTaskId = signal<Record<string, IssueDetails>>({});
   readonly issueCommentsCacheByTaskId = signal<Record<string, IssueComment[]>>({});
+  readonly canImportIssues = computed(() => !!this.selectedProject()?.hasGitHubInstallation);
 
   private readonly taskLabelsLoading = new Set<string>();
 
@@ -104,8 +111,7 @@ export class KanbanPage implements OnInit, OnDestroy {
   readonly projectForm = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(150)]],
     repoOwner: ['', [Validators.required, Validators.maxLength(100)]],
-    repoName: ['', [Validators.required, Validators.maxLength(100)]],
-    gitHubToken: ['', [Validators.required, Validators.maxLength(4000)]]
+    repoName: ['', [Validators.required, Validators.maxLength(100)]]
   });
 
   readonly taskForm = this.fb.nonNullable.group({
@@ -154,6 +160,16 @@ export class KanbanPage implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.store.dispatch(loadProjects());
 
+    const githubStatus = this.route.snapshot.queryParamMap.get('github');
+    if (githubStatus === 'ok') {
+      this.ui.showSuccess('GitHub App conectada correctamente.');
+      this.clearGitHubQueryParams();
+    }
+    else if (githubStatus === 'error') {
+      this.ui.showError('No se pudo conectar la GitHub App.');
+      this.clearGitHubQueryParams();
+    }
+
     void this.signalr
       .startConnection()
       .then(() => this.signalr.onTaskUpdated(this.realtimeHandler))
@@ -186,13 +202,12 @@ export class KanbanPage implements OnInit, OnDestroy {
       return;
     }
 
-    const { name, repoOwner, repoName, gitHubToken } = this.projectForm.getRawValue();
+    const { name, repoOwner, repoName } = this.projectForm.getRawValue();
     this.store.dispatch(
       createProject({
         name: name.trim(),
         repoOwner: repoOwner.trim(),
-        repoName: repoName.trim(),
-        gitHubToken: gitHubToken.trim()
+        repoName: repoName.trim()
       })
     );
 
@@ -228,6 +243,22 @@ export class KanbanPage implements OnInit, OnDestroy {
       nzOkText: 'Importar',
       nzCancelText: 'Cancelar',
       nzOnOk: () => this.store.dispatch(importIssues())
+    });
+  }
+
+  connectGitHubApp(): void {
+    const projectId = this.selectedProjectId();
+    if (!projectId) {
+      return;
+    }
+
+    this.kanbanApi.getGitHubInstallUrl(projectId).subscribe({
+      next: (response) => {
+        window.location.assign(response.data.installUrl);
+      },
+      error: (error) => {
+        this.ui.showError(error.error?.message ?? 'No se pudo obtener la URL de instalacion.');
+      }
     });
   }
 
@@ -445,5 +476,15 @@ export class KanbanPage implements OnInit, OnDestroy {
       completedAt,
       updatedFrom
     };
+  }
+
+  private clearGitHubQueryParams(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const url = new URL(window.location.href);
+    url.searchParams.delete('github');
+    window.history.replaceState({}, '', url.toString());
   }
 }

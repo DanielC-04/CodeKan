@@ -5,4 +5,5 @@ public sealed record ProjectDto(
     string Name,
     string RepoOwner,
     string RepoName,
-    DateTime CreatedAt);
+    DateTime CreatedAt,
+    bool HasGitHubInstallation);

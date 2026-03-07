@@ -65,10 +65,8 @@ Se aplica Clean/Onion Architecture con dependencias dirigidas hacia adentro:
 - LinkedAt
 
 ## Seguridad definida
-- El token de GitHub NO se guarda en plano.
-- Se cifra en Infrastructure y se persiste como `GitHubTokenEncrypted`.
-- El token nunca se devuelve en respuestas API.
-- El token nunca debe aparecer en logs.
+- Integracion GitHub via GitHub App (sin tokens personales por proyecto).
+- Se persiste `GitHubInstallationId` para asociar el proyecto a la instalacion.
 - La API usa JWT Bearer para endpoints protegidos.
 - El refresh token se maneja en cookie `HttpOnly`.
 - El registro publico crea usuarios con rol `Member` de forma fija.
@@ -107,6 +105,7 @@ Todos los endpoints devolveran `ApiResponse<T>`:
 - `GET /hubs/devboard/negotiate` (handshake SignalR)
 - `GET /api/auth/github/start`
 - `GET /api/auth/github/callback`
+- `GET /api/github-app/callback`
 
 ## Flujo funcional completo del proyecto
 1. Usuario crea un Project vinculado a un repo GitHub.
@@ -284,6 +283,9 @@ dotnet test "backend/DevBoard.slnx"
   - Se agrego `DELETE /api/projects/{projectId}` con validacion por `ownerUserId`.
   - `ProjectService` elimina proyecto y tareas relacionadas por cascada en BD.
   - El borrado no ejecuta cambios en issues o repositorios de GitHub.
+- 2026-03-06 - Seccion GitHub App
+  - Se reemplazo el uso de tokens personales por instalacion de GitHub App.
+  - Se agrego `GitHubInstallationId` al proyecto y callback `GET /api/github-app/callback`.
 - 2026-03-05 - Seccion import issues manual
   - Se agrego `POST /api/projects/{projectId}/import-issues` para traer issues existentes del repo.
   - Importacion read-only con maximo 100 issues y mapeo `open` -> `Todo`, `closed` -> `Done`.

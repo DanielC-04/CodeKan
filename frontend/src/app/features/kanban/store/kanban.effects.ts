@@ -63,8 +63,8 @@ export class KanbanEffects {
   readonly createProject$ = createEffect(() =>
     this.actions$.pipe(
       ofType(createProject),
-      switchMap(({ name, repoOwner, repoName, gitHubToken }) =>
-        this.api.createProject({ name, repoOwner, repoName, gitHubToken }).pipe(
+      switchMap(({ name, repoOwner, repoName }) =>
+        this.api.createProject({ name, repoOwner, repoName }).pipe(
           map((response) => createProjectSuccess({ project: response.data })),
           catchError((error) =>
             of(createProjectFailure({ error: error.error?.message ?? 'No se pudo crear el proyecto.' }))

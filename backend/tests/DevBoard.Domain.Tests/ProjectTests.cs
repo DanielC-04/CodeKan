@@ -15,14 +15,14 @@ public sealed class ProjectTests
             name: "DevBoard",
             repoOwner: "carra",
             repoName: "devboard",
-            gitHubTokenEncrypted: "encrypted-token",
+            gitHubInstallationId: null,
             createdAt: createdAt);
 
         Assert.NotEqual(Guid.Empty, project.Id);
         Assert.Equal("DevBoard", project.Name);
         Assert.Equal("carra", project.RepoOwner);
         Assert.Equal("devboard", project.RepoName);
-        Assert.Equal("encrypted-token", project.GitHubTokenEncrypted);
+        Assert.Null(project.GitHubInstallationId);
         Assert.Equal(createdAt, project.CreatedAt);
     }
 
@@ -34,7 +34,7 @@ public sealed class ProjectTests
             name: " ",
             repoOwner: "carra",
             repoName: "devboard",
-            gitHubTokenEncrypted: "encrypted-token");
+            gitHubInstallationId: null);
 
         var exception = Assert.Throws<DomainException>(action);
         Assert.Equal("name is required.", exception.Message);
