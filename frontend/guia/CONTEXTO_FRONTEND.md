@@ -107,6 +107,7 @@ No guardar:
 - Cobertura de pruebas frontend extendida para Kanban y tarjetas.
 - Instrumentacion de NgRx Store DevTools activa para debugging en desarrollo (`logOnly` cuando `production=true`).
 - Importacion manual de issues GitHub desde la UI Kanban (hasta 100, re-ejecutable).
+- Conexion a GitHub mediante GitHub App (sin tokens personales).
 
 ## Bitacora de cambios
 
@@ -144,3 +145,6 @@ No guardar:
   - Se agrego boton "Importar Issues" en Kanban y confirmacion modal.
   - NgRx incorpora flujo `importIssues` con reload de tareas y mensaje de resultado.
   - API frontend agrega `POST /api/projects/{projectId}/import-issues`.
+- 2026-03-06 - GitHub App
+  - Se elimina el input de token en creacion de proyecto.
+  - Se agrega boton "Conectar GitHub App" con instalacion via `state=<projectId>`.

@@ -9,7 +9,7 @@ public sealed class Project
     public string Name { get; private set; }
     public string RepoOwner { get; private set; }
     public string RepoName { get; private set; }
-    public string GitHubTokenEncrypted { get; private set; }
+    public long? GitHubInstallationId { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public AppUser Owner { get; private set; }
 
@@ -22,7 +22,7 @@ public sealed class Project
         Name = string.Empty;
         RepoOwner = string.Empty;
         RepoName = string.Empty;
-        GitHubTokenEncrypted = string.Empty;
+        GitHubInstallationId = null;
     }
 
     public Project(
@@ -30,7 +30,7 @@ public sealed class Project
         string name,
         string repoOwner,
         string repoName,
-        string gitHubTokenEncrypted,
+        long? gitHubInstallationId,
         DateTime? createdAt = null)
     {
         Id = Guid.NewGuid();
@@ -39,7 +39,7 @@ public sealed class Project
         Name = ValidateRequired(name, nameof(name), 150);
         RepoOwner = ValidateRequired(repoOwner, nameof(repoOwner), 100);
         RepoName = ValidateRequired(repoName, nameof(repoName), 100);
-        GitHubTokenEncrypted = ValidateRequired(gitHubTokenEncrypted, nameof(gitHubTokenEncrypted), 4000);
+        GitHubInstallationId = gitHubInstallationId;
         CreatedAt = createdAt ?? DateTime.UtcNow;
     }
 
@@ -54,9 +54,14 @@ public sealed class Project
         RepoName = ValidateRequired(repoName, nameof(repoName), 100);
     }
 
-    public void RotateGitHubToken(string gitHubTokenEncrypted)
+    public void SetGitHubInstallation(long installationId)
     {
-        GitHubTokenEncrypted = ValidateRequired(gitHubTokenEncrypted, nameof(gitHubTokenEncrypted), 4000);
+        if (installationId <= 0)
+        {
+            throw new DomainException("installationId must be positive.");
+        }
+
+        GitHubInstallationId = installationId;
     }
 
     private static string ValidateRequired(string value, string field, int maxLength)

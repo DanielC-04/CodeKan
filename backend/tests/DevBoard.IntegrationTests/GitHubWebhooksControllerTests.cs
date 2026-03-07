@@ -127,7 +127,7 @@ public sealed class GitHubWebhooksControllerTests : IClassFixture<WebhookTestWeb
             dbContext.Database.EnsureDeleted();
             dbContext.Database.EnsureCreated();
 
-            var project = new DevBoard.Domain.Entities.Project(Guid.NewGuid(), "DevBoard", "carra", "devboard", "encrypted-token");
+            var project = new DevBoard.Domain.Entities.Project(Guid.NewGuid(), "DevBoard", "carra", "devboard", 321);
             var task = new DevBoard.Domain.Entities.Task(project.Id, title);
             task.SetGitHubIssueNumber(issueNumber);
 

@@ -13,7 +13,7 @@ export const loadProjectsFailure = createAction(
 
 export const createProject = createAction(
   '[Kanban] Create Project',
-  props<{ name: string; repoOwner: string; repoName: string; gitHubToken: string }>()
+  props<{ name: string; repoOwner: string; repoName: string }>()
 );
 export const createProjectSuccess = createAction(
   '[Kanban] Create Project Success',

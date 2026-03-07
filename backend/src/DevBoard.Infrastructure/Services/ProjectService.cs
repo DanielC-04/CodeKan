@@ -11,19 +11,17 @@ namespace DevBoard.Infrastructure.Services;
 
 public sealed class ProjectService(
     ApplicationDbContext dbContext,
-    ITokenProtector tokenProtector,
-    IGitHubIssueService gitHubIssueService) : IProjectService
+    IGitHubIssueService gitHubIssueService,
+    IGitHubAppTokenService gitHubAppTokenService) : IProjectService
 {
     public async Task<ProjectDto> CreateAsync(Guid ownerUserId, CreateProjectRequest request, CancellationToken cancellationToken = default)
     {
-        var encryptedToken = tokenProtector.Protect(request.GitHubToken);
-
         var project = new Project(
             ownerUserId,
             request.Name,
             request.RepoOwner,
             request.RepoName,
-            encryptedToken);
+            gitHubInstallationId: null);
 
         dbContext.Projects.Add(project);
         await dbContext.SaveChangesAsync(cancellationToken);
@@ -48,6 +46,35 @@ public sealed class ProjectService(
             .FirstOrDefaultAsync(project => project.Id == projectId && project.OwnerUserId == ownerUserId, cancellationToken);
 
         return project is null ? null : Map(project);
+    }
+
+    public async Task<bool> IsGitHubInstallationConfiguredAsync(
+        Guid ownerUserId,
+        Guid projectId,
+        CancellationToken cancellationToken = default)
+    {
+        return await dbContext.Projects
+            .AsNoTracking()
+            .AnyAsync(item => item.Id == projectId && item.OwnerUserId == ownerUserId && item.GitHubInstallationId.HasValue, cancellationToken);
+    }
+
+    public async Task<ProjectDto?> ConnectGitHubInstallationAsync(
+        Guid ownerUserId,
+        Guid projectId,
+        long installationId,
+        CancellationToken cancellationToken = default)
+    {
+        var project = await dbContext.Projects
+            .FirstOrDefaultAsync(item => item.Id == projectId && item.OwnerUserId == ownerUserId, cancellationToken);
+
+        if (project is null)
+        {
+            return null;
+        }
+
+        project.SetGitHubInstallation(installationId);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return Map(project);
     }
 
     public async Task<bool> DeleteAsync(Guid ownerUserId, Guid projectId, CancellationToken cancellationToken = default)
@@ -80,7 +107,12 @@ public sealed class ProjectService(
             throw new InvalidOperationException("Project not found.");
         }
 
-        var token = tokenProtector.Unprotect(project.GitHubTokenEncrypted);
+        if (!project.GitHubInstallationId.HasValue)
+        {
+            throw new InvalidOperationException("GitHub App installation is not configured for this project.");
+        }
+
+        var token = await gitHubAppTokenService.GetInstallationTokenAsync(project.GitHubInstallationId.Value, cancellationToken);
         var issues = await gitHubIssueService.ListIssuesAsync(project.RepoOwner, project.RepoName, maxIssues, token, cancellationToken);
 
         var issueNumbers = issues.Select(issue => issue.IssueNumber).ToList();
@@ -127,5 +159,5 @@ public sealed class ProjectService(
     }
 
     private static ProjectDto Map(Project project) =>
-        new(project.Id, project.Name, project.RepoOwner, project.RepoName, project.CreatedAt);
+        new(project.Id, project.Name, project.RepoOwner, project.RepoName, project.CreatedAt, project.GitHubInstallationId.HasValue);
 }

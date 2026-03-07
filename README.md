@@ -123,7 +123,7 @@ npm run test -- --watch=false
 
 ## Seguridad
 
-- El token de GitHub se cifra en backend.
+- La integracion GitHub se realiza via GitHub App (sin tokens personales).
 - El refresh token se maneja en cookie HttpOnly.
 - No se versionan archivos locales sensibles (`appsettings.Development.json`, `environment*.ts` locales).
 

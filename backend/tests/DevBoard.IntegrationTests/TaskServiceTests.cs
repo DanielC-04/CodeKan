@@ -21,15 +21,15 @@ public sealed class TaskServiceTests
         await using var dbContext = CreateContext(dbName);
         var project = SeedProject(dbContext);
 
-        var tokenProtector = new Mock<ITokenProtector>();
-        tokenProtector.Setup(item => item.Unprotect("encrypted-token")).Returns("plain-token");
+        var appTokenService = new Mock<IGitHubAppTokenService>();
+        appTokenService.Setup(item => item.GetInstallationTokenAsync(321, It.IsAny<CancellationToken>())).ReturnsAsync("plain-token");
 
         var gitHubIssueService = new Mock<IGitHubIssueService>();
         gitHubIssueService
             .Setup(item => item.CreateIssueAsync(project.RepoOwner, project.RepoName, "New task", null, "plain-token", It.IsAny<CancellationToken>()))
             .ReturnsAsync(123);
 
-        var service = new TaskService(dbContext, tokenProtector.Object, gitHubIssueService.Object, Mock.Of<ILogger<TaskService>>());
+        var service = new TaskService(dbContext, gitHubIssueService.Object, appTokenService.Object, Mock.Of<ILogger<TaskService>>());
 
         var result = await service.CreateAsync(project.OwnerUserId, project.Id, new CreateTaskRequest("New task"));
 
@@ -47,15 +47,15 @@ public sealed class TaskServiceTests
         await using var dbContext = CreateContext(dbName);
         var project = SeedProject(dbContext);
 
-        var tokenProtector = new Mock<ITokenProtector>();
-        tokenProtector.Setup(item => item.Unprotect("encrypted-token")).Returns("plain-token");
+        var appTokenService = new Mock<IGitHubAppTokenService>();
+        appTokenService.Setup(item => item.GetInstallationTokenAsync(321, It.IsAny<CancellationToken>())).ReturnsAsync("plain-token");
 
         var gitHubIssueService = new Mock<IGitHubIssueService>();
         gitHubIssueService
             .Setup(item => item.CreateIssueAsync(project.RepoOwner, project.RepoName, "New task", null, "plain-token", It.IsAny<CancellationToken>()))
             .ThrowsAsync(new GitHubIntegrationException("GitHub unavailable."));
 
-        var service = new TaskService(dbContext, tokenProtector.Object, gitHubIssueService.Object, Mock.Of<ILogger<TaskService>>());
+        var service = new TaskService(dbContext, gitHubIssueService.Object, appTokenService.Object, Mock.Of<ILogger<TaskService>>());
 
         await Assert.ThrowsAsync<GitHubIntegrationException>(() =>
             service.CreateAsync(project.OwnerUserId, project.Id, new CreateTaskRequest("New task")));
@@ -71,8 +71,8 @@ public sealed class TaskServiceTests
 
         var cts = new CancellationTokenSource();
 
-        var tokenProtector = new Mock<ITokenProtector>();
-        tokenProtector.Setup(item => item.Unprotect("encrypted-token")).Returns("plain-token");
+        var appTokenService = new Mock<IGitHubAppTokenService>();
+        appTokenService.Setup(item => item.GetInstallationTokenAsync(321, It.IsAny<CancellationToken>())).ReturnsAsync("plain-token");
 
         var gitHubIssueService = new Mock<IGitHubIssueService>();
         gitHubIssueService
@@ -87,7 +87,7 @@ public sealed class TaskServiceTests
             .Setup(item => item.CloseIssueAsync(project.RepoOwner, project.RepoName, 999, "plain-token", It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
-        var service = new TaskService(dbContext, tokenProtector.Object, gitHubIssueService.Object, Mock.Of<ILogger<TaskService>>());
+        var service = new TaskService(dbContext, gitHubIssueService.Object, appTokenService.Object, Mock.Of<ILogger<TaskService>>());
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
             service.CreateAsync(project.OwnerUserId, project.Id, new CreateTaskRequest("New task"), cts.Token));
@@ -108,15 +108,15 @@ public sealed class TaskServiceTests
         await using var dbContext = CreateContext(dbName);
         var project = await dbContext.Projects.AsNoTracking().FirstAsync();
 
-        var tokenProtector = new Mock<ITokenProtector>();
-        tokenProtector.Setup(item => item.Unprotect("encrypted-token")).Returns("plain-token");
+        var appTokenService = new Mock<IGitHubAppTokenService>();
+        appTokenService.Setup(item => item.GetInstallationTokenAsync(321, It.IsAny<CancellationToken>())).ReturnsAsync("plain-token");
 
         var gitHubIssueService = new Mock<IGitHubIssueService>();
         gitHubIssueService
             .Setup(item => item.CloseIssueAsync(project.RepoOwner, project.RepoName, 456, "plain-token", It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
-        var service = new TaskService(dbContext, tokenProtector.Object, gitHubIssueService.Object, Mock.Of<ILogger<TaskService>>());
+        var service = new TaskService(dbContext, gitHubIssueService.Object, appTokenService.Object, Mock.Of<ILogger<TaskService>>());
 
         var result = await service.UpdateStatusAsync(project.OwnerUserId, taskId, new UpdateTaskStatusRequest("Done"));
 
@@ -138,15 +138,15 @@ public sealed class TaskServiceTests
         await using var dbContext = CreateContext(dbName);
         var project = await dbContext.Projects.AsNoTracking().FirstAsync();
 
-        var tokenProtector = new Mock<ITokenProtector>();
-        tokenProtector.Setup(item => item.Unprotect("encrypted-token")).Returns("plain-token");
+        var appTokenService = new Mock<IGitHubAppTokenService>();
+        appTokenService.Setup(item => item.GetInstallationTokenAsync(321, It.IsAny<CancellationToken>())).ReturnsAsync("plain-token");
 
         var gitHubIssueService = new Mock<IGitHubIssueService>();
         gitHubIssueService
             .Setup(item => item.CloseIssueAsync(project.RepoOwner, project.RepoName, 456, "plain-token", It.IsAny<CancellationToken>()))
             .ThrowsAsync(new GitHubIntegrationException("Close failed."));
 
-        var service = new TaskService(dbContext, tokenProtector.Object, gitHubIssueService.Object, Mock.Of<ILogger<TaskService>>());
+        var service = new TaskService(dbContext, gitHubIssueService.Object, appTokenService.Object, Mock.Of<ILogger<TaskService>>());
 
         await Assert.ThrowsAsync<GitHubIntegrationException>(() =>
             service.UpdateStatusAsync(project.OwnerUserId, taskId, new UpdateTaskStatusRequest("Done"))!);
@@ -167,15 +167,15 @@ public sealed class TaskServiceTests
         await using var dbContext = CreateContext(dbName);
         var project = await dbContext.Projects.AsNoTracking().FirstAsync();
 
-        var tokenProtector = new Mock<ITokenProtector>();
-        tokenProtector.Setup(item => item.Unprotect("encrypted-token")).Returns("plain-token");
+        var appTokenService = new Mock<IGitHubAppTokenService>();
+        appTokenService.Setup(item => item.GetInstallationTokenAsync(321, It.IsAny<CancellationToken>())).ReturnsAsync("plain-token");
 
         var gitHubIssueService = new Mock<IGitHubIssueService>();
         gitHubIssueService
             .Setup(item => item.ReopenIssueAsync(project.RepoOwner, project.RepoName, 456, "plain-token", It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
-        var service = new TaskService(dbContext, tokenProtector.Object, gitHubIssueService.Object, Mock.Of<ILogger<TaskService>>());
+        var service = new TaskService(dbContext, gitHubIssueService.Object, appTokenService.Object, Mock.Of<ILogger<TaskService>>());
 
         var result = await service.UpdateStatusAsync(project.OwnerUserId, taskId, new UpdateTaskStatusRequest("InProgress"));
 
@@ -197,15 +197,15 @@ public sealed class TaskServiceTests
         await using var dbContext = CreateContext(dbName);
         var project = await dbContext.Projects.AsNoTracking().FirstAsync();
 
-        var tokenProtector = new Mock<ITokenProtector>();
-        tokenProtector.Setup(item => item.Unprotect("encrypted-token")).Returns("plain-token");
+        var appTokenService = new Mock<IGitHubAppTokenService>();
+        appTokenService.Setup(item => item.GetInstallationTokenAsync(321, It.IsAny<CancellationToken>())).ReturnsAsync("plain-token");
 
         var gitHubIssueService = new Mock<IGitHubIssueService>();
         gitHubIssueService
             .Setup(item => item.ReopenIssueAsync(project.RepoOwner, project.RepoName, 456, "plain-token", It.IsAny<CancellationToken>()))
             .ThrowsAsync(new GitHubIntegrationException("Reopen failed."));
 
-        var service = new TaskService(dbContext, tokenProtector.Object, gitHubIssueService.Object, Mock.Of<ILogger<TaskService>>());
+        var service = new TaskService(dbContext, gitHubIssueService.Object, appTokenService.Object, Mock.Of<ILogger<TaskService>>());
 
         await Assert.ThrowsAsync<GitHubIntegrationException>(() =>
             service.UpdateStatusAsync(project.OwnerUserId, taskId, new UpdateTaskStatusRequest("InProgress"))!);
@@ -228,7 +228,7 @@ public sealed class TaskServiceTests
 
     private static DevBoard.Domain.Entities.Project SeedProject(ApplicationDbContext dbContext)
     {
-        var project = new DevBoard.Domain.Entities.Project(Guid.NewGuid(), "DevBoard", "carra", "devboard", "encrypted-token");
+        var project = new DevBoard.Domain.Entities.Project(Guid.NewGuid(), "DevBoard", "carra", "devboard", 321);
         dbContext.Projects.Add(project);
         dbContext.SaveChanges();
         return project;

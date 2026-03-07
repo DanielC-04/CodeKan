@@ -26,9 +26,7 @@ internal sealed class ProjectConfiguration : IEntityTypeConfiguration<Project>
             .HasMaxLength(100)
             .IsRequired();
 
-        builder.Property(project => project.GitHubTokenEncrypted)
-            .HasMaxLength(4000)
-            .IsRequired();
+        builder.Property(project => project.GitHubInstallationId);
 
         builder.Property(project => project.CreatedAt)
             .IsRequired();

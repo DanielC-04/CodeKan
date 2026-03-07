@@ -11,8 +11,8 @@ namespace DevBoard.Infrastructure.Services;
 
 public sealed class TaskService(
     ApplicationDbContext dbContext,
-    ITokenProtector tokenProtector,
     IGitHubIssueService gitHubIssueService,
+    IGitHubAppTokenService gitHubAppTokenService,
     ILogger<TaskService> logger) : ITaskService
 {
     public async Task<TaskDto> CreateAsync(
@@ -29,7 +29,12 @@ public sealed class TaskService(
             throw new InvalidOperationException("Project not found.");
         }
 
-        var token = tokenProtector.Unprotect(project.GitHubTokenEncrypted);
+        if (!project.GitHubInstallationId.HasValue)
+        {
+            throw new InvalidOperationException("GitHub App installation is not configured for this project.");
+        }
+
+        var token = await gitHubAppTokenService.GetInstallationTokenAsync(project.GitHubInstallationId.Value, cancellationToken);
         var createdIssueNumber = await gitHubIssueService.CreateIssueAsync(
             project.RepoOwner,
             project.RepoName,
@@ -124,7 +129,12 @@ public sealed class TaskService(
                 throw new InvalidOperationException("Task does not have an associated GitHub issue.");
             }
 
-            var token = tokenProtector.Unprotect(task.Project.GitHubTokenEncrypted);
+            if (!task.Project.GitHubInstallationId.HasValue)
+            {
+                throw new InvalidOperationException("GitHub App installation is not configured for this project.");
+            }
+
+            var token = await gitHubAppTokenService.GetInstallationTokenAsync(task.Project.GitHubInstallationId.Value, cancellationToken);
 
             if (newStatus == TaskStatus.Done)
             {
@@ -172,7 +182,12 @@ public sealed class TaskService(
             throw new InvalidOperationException("Task does not have an associated GitHub issue.");
         }
 
-        var token = tokenProtector.Unprotect(task.Project.GitHubTokenEncrypted);
+        if (!task.Project.GitHubInstallationId.HasValue)
+        {
+            throw new InvalidOperationException("GitHub App installation is not configured for this project.");
+        }
+
+        var token = await gitHubAppTokenService.GetInstallationTokenAsync(task.Project.GitHubInstallationId.Value, cancellationToken);
         var details = await gitHubIssueService.GetIssueDetailsAsync(
             task.Project.RepoOwner,
             task.Project.RepoName,
@@ -203,7 +218,12 @@ public sealed class TaskService(
             throw new InvalidOperationException("Task does not have an associated GitHub issue.");
         }
 
-        var token = tokenProtector.Unprotect(task.Project.GitHubTokenEncrypted);
+        if (!task.Project.GitHubInstallationId.HasValue)
+        {
+            throw new InvalidOperationException("GitHub App installation is not configured for this project.");
+        }
+
+        var token = await gitHubAppTokenService.GetInstallationTokenAsync(task.Project.GitHubInstallationId.Value, cancellationToken);
         return await gitHubIssueService.GetIssueCommentsAsync(
             task.Project.RepoOwner,
             task.Project.RepoName,

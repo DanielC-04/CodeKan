@@ -6,13 +6,13 @@ export interface ProjectDto {
   repoOwner: string;
   repoName: string;
   createdAt: string;
+  hasGitHubInstallation: boolean;
 }
 
 export interface CreateProjectRequest {
   name: string;
   repoOwner: string;
   repoName: string;
-  gitHubToken: string;
 }
 
 export interface TaskDto {
