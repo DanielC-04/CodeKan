@@ -37,6 +37,7 @@ public static class DependencyInjection
         services.AddScoped<IProjectService, ProjectService>();
         services.AddScoped<ITaskService, TaskService>();
         services.AddScoped<IGitHubIssueService, GitHubIssueService>();
+        services.AddSingleton<IGitHubAppInstallationService, GitHubAppInstallationService>();
         services.AddSingleton<IGitHubAppTokenService, GitHubAppTokenService>();
         services.AddHttpClient<IGitHubOAuthClient, GitHubOAuthClient>();
         services.AddScoped<GitHubSignatureValidator>();
