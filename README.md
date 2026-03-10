@@ -56,6 +56,9 @@ DevBoard/
 2. Ajusta:
    - `ConnectionStrings:DevBoardDb`
    - `GitHub:WebhookSecret`
+   - `GitHubApp:AppId`, `GitHubApp:PrivateKey`
+   - `GitHubApp:InstallUrl`, `GitHubApp:StateSecret`
+   - `Frontend:BaseUrl`
    - `GitHubOAuth:ClientId`, `GitHubOAuth:ClientSecret`
    - `GitHubOAuth:FrontendSuccessUrl`, `GitHubOAuth:FrontendErrorUrl`
    - `Jwt:Issuer`, `Jwt:Audience`, `Jwt:Key`
@@ -112,18 +115,21 @@ npm run test -- --watch=false
 
 ## Flujo GitHub/Webhook (resumen)
 
-1. Crear proyecto en DevBoard con `repoOwner`, `repoName` y token.
-2. Crear tarea desde Kanban -> se crea issue en GitHub.
-3. Cambiar estado:
+1. Crear proyecto en DevBoard con `repoOwner` y `repoName`.
+2. Si la GitHub App ya esta instalada para ese repo, el backend auto-vincula `GitHubInstallationId`.
+3. Si no esta instalada, usar `Conectar GitHub App` y, si corresponde, `Vincular instalacion existente`.
+4. Crear tarea desde Kanban -> se crea issue en GitHub.
+5. Cambiar estado:
    - `Done` -> cierra issue
    - `Done -> InProgress` -> reabre issue
-4. Cambios hechos en GitHub (close/reopen/edit) llegan por webhook y actualizan DevBoard.
-5. SignalR notifica a clientes en tiempo real.
-6. (Opcional) El usuario puede importar issues existentes del repo manualmente.
+6. Cambios hechos en GitHub (close/reopen/edit) llegan por webhook y actualizan DevBoard.
+7. SignalR notifica a clientes en tiempo real.
+8. (Opcional) El usuario puede importar issues existentes del repo manualmente.
 
 ## Seguridad
 
 - La integracion GitHub se realiza via GitHub App (sin tokens personales).
+- El callback de instalacion usa `state` firmado (HMAC) y `nonce` de un solo uso (TTL 10 min).
 - El refresh token se maneja en cookie HttpOnly.
 - No se versionan archivos locales sensibles (`appsettings.Development.json`, `environment*.ts` locales).
 

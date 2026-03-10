@@ -44,7 +44,7 @@ Se aplica Clean/Onion Architecture con dependencias dirigidas hacia adentro:
 - Name
 - RepoOwner
 - RepoName
-- GitHubTokenEncrypted
+- GitHubInstallationId (nullable)
 - CreatedAt
 
 ### Task
@@ -67,6 +67,8 @@ Se aplica Clean/Onion Architecture con dependencias dirigidas hacia adentro:
 ## Seguridad definida
 - Integracion GitHub via GitHub App (sin tokens personales por proyecto).
 - Se persiste `GitHubInstallationId` para asociar el proyecto a la instalacion.
+- El flujo de instalacion usa `state` firmado (HMAC) con `nonce` y expiracion corta para evitar replay.
+- Los `nonce` se almacenan en tabla `GitHubInstallationNonces` con consumo unico.
 - La API usa JWT Bearer para endpoints protegidos.
 - El refresh token se maneja en cookie `HttpOnly`.
 - El registro publico crea usuarios con rol `Member` de forma fija.
@@ -105,19 +107,23 @@ Todos los endpoints devolveran `ApiResponse<T>`:
 - `GET /hubs/devboard/negotiate` (handshake SignalR)
 - `GET /api/auth/github/start`
 - `GET /api/auth/github/callback`
+- `POST /api/github-app/install-url`
+- `POST /api/github-app/link-existing`
 - `GET /api/github-app/callback`
 
 ## Flujo funcional completo del proyecto
 1. Usuario crea un Project vinculado a un repo GitHub.
-2. Usuario crea una Task en ese Project.
-3. Backend crea un Issue en GitHub y guarda `GitHubIssueNumber`.
-4. Usuario mueve Task de columna en Kanban.
-5. Si Task llega a Done, backend cierra el Issue en GitHub.
-6. Si Task vuelve de `Done` a `InProgress`, backend reabre el Issue en GitHub.
-7. GitHub envia webhooks por cambios externos (ej. issue cerrada manualmente en GitHub).
-8. Backend parsea webhook, actualiza Task local y emite `TaskUpdated` por SignalR.
-9. Frontend escucha `TaskUpdated`, despacha accion NgRx y actualiza UI al instante.
-10. El usuario puede importar issues existentes de GitHub manualmente (hasta 100, sin editar GitHub).
+2. Backend intenta auto-vincular instalacion existente de GitHub App para `owner/repo`.
+3. Si no hay instalacion, frontend permite `Conectar GitHub App` o `Vincular instalacion existente`.
+4. Usuario crea una Task en ese Project.
+5. Backend crea un Issue en GitHub y guarda `GitHubIssueNumber`.
+6. Usuario mueve Task de columna en Kanban.
+7. Si Task llega a Done, backend cierra el Issue en GitHub.
+8. Si Task vuelve de `Done` a `InProgress`, backend reabre el Issue en GitHub.
+9. GitHub envia webhooks por cambios externos (ej. issue cerrada manualmente en GitHub).
+10. Backend parsea webhook, actualiza Task local y emite `TaskUpdated` por SignalR.
+11. Frontend escucha `TaskUpdated`, despacha accion NgRx y actualiza UI al instante.
+12. El usuario puede importar issues existentes de GitHub manualmente (hasta 100, sin editar GitHub).
 
 ## Flujo de usuario en DevBoard (simple)
 - El usuario crea un `Project` dentro de DevBoard para un desarrollo concreto.
@@ -177,7 +183,6 @@ $projectBody = @{
   name = "Sandbox"
   repoOwner = "TU_OWNER"
   repoName = "TU_REPO"
-  gitHubToken = "TU_TOKEN"
 } | ConvertTo-Json
 
 $projectResp = Invoke-RestMethod -Method Post -Uri "http://localhost:5067/api/projects" -ContentType "application/json" -Body $projectBody
@@ -219,7 +224,6 @@ dotnet test "backend/DevBoard.slnx"
 - Migracion inicial de base de datos creada y aplicable via `dotnet ef database update`.
 - Contratos de Application (`ApiResponse<T>`, DTOs, interfaces) implementados.
 - Endpoints MVP base de Projects y Tasks implementados.
-- Cifrado de token de GitHub implementado con Data Protection.
 - FluentValidation configurado para requests de Projects/Tasks.
 - Middleware global de excepciones implementado y controllers simplificados sin `try/catch` repetido.
 - Integracion Octokit implementada para crear/cerrar issues.
@@ -286,6 +290,11 @@ dotnet test "backend/DevBoard.slnx"
 - 2026-03-06 - Seccion GitHub App
   - Se reemplazo el uso de tokens personales por instalacion de GitHub App.
   - Se agrego `GitHubInstallationId` al proyecto y callback `GET /api/github-app/callback`.
+- 2026-03-07 - Seccion GitHub App hardened
+  - Se agrego `POST /api/github-app/install-url` con `state` firmado (HMAC), `nonce` y TTL 10 min.
+  - Se agrego tabla `GitHubInstallationNonces` para evitar replay del callback.
+  - Se agrego `POST /api/github-app/link-existing` para vincular una instalacion ya existente.
+  - Se implemento auto-vinculacion al crear proyecto cuando la App ya esta instalada para el repo.
 - 2026-03-05 - Seccion import issues manual
   - Se agrego `POST /api/projects/{projectId}/import-issues` para traer issues existentes del repo.
   - Importacion read-only con maximo 100 issues y mapeo `open` -> `Todo`, `closed` -> `Done`.
