@@ -108,6 +108,7 @@ No guardar:
 - Instrumentacion de NgRx Store DevTools activa para debugging en desarrollo (`logOnly` cuando `production=true`).
 - Importacion manual de issues GitHub desde la UI Kanban (hasta 100, re-ejecutable).
 - Conexion a GitHub mediante GitHub App (sin tokens personales).
+- Vinculacion manual de instalacion existente para repos ya configurados en GitHub App.
 
 ## Bitacora de cambios
 
@@ -147,4 +148,8 @@ No guardar:
   - API frontend agrega `POST /api/projects/{projectId}/import-issues`.
 - 2026-03-06 - GitHub App
   - Se elimina el input de token en creacion de proyecto.
-  - Se agrega boton "Conectar GitHub App" con instalacion via `state=<projectId>`.
+  - Se agrega boton "Conectar GitHub App" con instalacion via backend (`POST /api/github-app/install-url`).
+- 2026-03-07 - GitHub App auto-link
+  - Si la App ya estaba instalada para el repo, backend auto-vincula al crear el proyecto.
+  - Se agrega boton "Vincular instalacion existente" con modal de confirmacion.
+  - Los botones de conexion/vinculacion se desactivan cuando `hasGitHubInstallation=true`.
